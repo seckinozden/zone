@@ -53,8 +53,8 @@ export function CalendarMonth({ anchor, range, onSelectDay, onSelectEvent }: Pro
   const rowCount = days.length / 7
 
   return (
-    <div className="border border-white/5 rounded-xl overflow-hidden bg-surface-low/30 flex flex-col h-full">
-      <div className="grid grid-cols-7 border-b border-white/5 flex-shrink-0">
+    <div className="border border-divider rounded-xl overflow-hidden bg-surface-low/30 flex flex-col h-full">
+      <div className="grid grid-cols-7 border-b border-divider flex-shrink-0">
         {WEEKDAY_LABELS.map((d) => (
           <div key={d} className="label-caps text-center py-3">{d}</div>
         ))}
@@ -76,7 +76,7 @@ export function CalendarMonth({ anchor, range, onSelectDay, onSelectEvent }: Pro
             <div
               key={day.toISOString()}
               onClick={() => onSelectDay(day)}
-              className={`relative border-t border-l border-white/5 p-2 cursor-pointer hover:bg-white/[0.02] flex flex-col gap-1 overflow-hidden ${
+              className={`relative border-t border-l border-divider p-2 cursor-pointer hover:bg-on-surface/[0.04] flex flex-col gap-1 overflow-hidden ${
                 inMonth ? '' : 'opacity-40'
               }`}
             >

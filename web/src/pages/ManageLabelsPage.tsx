@@ -40,7 +40,7 @@ export function ManageLabelsPage() {
       <div className="mt-6 flex-1 min-h-0 overflow-y-auto">
         {isLoading && <div className="text-on-surface-variant text-sm">Loading…</div>}
         {!isLoading && categories.length === 0 && (
-          <div className="rounded-xl border border-white/5 bg-surface-low/30 p-8 text-center text-on-surface-variant">
+          <div className="rounded-xl border border-divider bg-surface-low/30 p-8 text-center text-on-surface-variant">
             No labels yet — create your first one to start organizing.
           </div>
         )}
@@ -59,7 +59,7 @@ export function ManageLabelsPage() {
 function LabelCard({ category, onEdit }: { category: Category; onEdit: () => void }) {
   const color = categoryColor(category)
   return (
-    <div className="rounded-xl border border-white/5 bg-surface-low/40 p-5 flex items-start gap-4">
+    <div className="rounded-xl border border-divider bg-surface-low/40 p-5 flex items-start gap-4">
       <div
         className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
         style={{ backgroundColor: `color-mix(in srgb, ${color} 22%, transparent)`, color }}

@@ -23,7 +23,7 @@ export function LoginPage() {
     <div className="min-h-full flex items-center justify-center px-6">
       <form
         onSubmit={submit}
-        className="w-full max-w-md bg-surface rounded-2xl p-8 border border-white/5"
+        className="w-full max-w-md bg-surface rounded-2xl p-8 border border-divider"
       >
         <div className="flex flex-col items-center gap-3 mb-8">
           <div className="w-12 h-12 rounded-xl bg-brand-strong flex items-center justify-center">
@@ -34,7 +34,7 @@ export function LoginPage() {
         </div>
 
         <label className="label-caps block mb-2">Email Address</label>
-        <div className="flex items-center bg-surface-lowest rounded-lg px-3 mb-5 border border-white/5">
+        <div className="flex items-center bg-surface-lowest rounded-lg px-3 mb-5 border border-divider">
           <AtSign size={18} className="text-on-surface-variant" />
           <input
             type="text"
@@ -50,7 +50,7 @@ export function LoginPage() {
           <label className="label-caps">Password</label>
           <button type="button" className="text-xs text-brand">Forgot Password?</button>
         </div>
-        <div className="flex items-center bg-surface-lowest rounded-lg px-3 mb-5 border border-white/5">
+        <div className="flex items-center bg-surface-lowest rounded-lg px-3 mb-5 border border-divider">
           <Lock size={18} className="text-on-surface-variant" />
           <input
             type={show ? 'text' : 'password'}

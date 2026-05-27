@@ -26,7 +26,7 @@ export function AppLayout() {
   return (
     <TaskModalContext.Provider value={ctx}>
       <div className="flex h-full">
-        <Sidebar onCreateTask={() => ctx.openCreate()} />
+        <Sidebar />
         <main className="flex-1 min-h-0 px-8 py-6 flex flex-col overflow-hidden">
           <Outlet />
         </main>

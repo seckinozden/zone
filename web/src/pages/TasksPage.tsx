@@ -59,7 +59,7 @@ export function TasksPage() {
       <div className="mt-6 flex-1 min-h-0 overflow-y-auto">
         {isLoading && <div className="text-on-surface-variant text-sm">Loading…</div>}
         {!isLoading && events.length === 0 && (
-          <div className="rounded-xl border border-white/5 bg-surface-low/30 p-8 text-center text-on-surface-variant">
+          <div className="rounded-xl border border-divider bg-surface-low/30 p-8 text-center text-on-surface-variant">
             No tasks scheduled for {format(anchor, 'MMMM yyyy')}.
           </div>
         )}
@@ -107,7 +107,7 @@ function DaySection({
             <li key={e.id}>
               <button
                 onClick={() => onEdit(e)}
-                className="w-full flex items-center gap-3 text-left rounded-xl bg-surface-low/40 hover:bg-surface-low border border-white/5 p-3"
+                className="w-full flex items-center gap-3 text-left rounded-xl bg-surface-low/40 hover:bg-surface-low border border-divider p-3"
                 style={{ borderLeft: `3px solid ${color}` }}
               >
                 <div className="flex-1">

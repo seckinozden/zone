@@ -97,7 +97,7 @@ export function TaskModal({ open, initial, defaultDay, defaultStart, onClose }: 
       role="presentation"
     >
       <div
-        className="w-full max-w-lg bg-surface rounded-2xl border border-white/5 p-6"
+        className="w-full max-w-lg bg-surface rounded-2xl border border-divider p-6"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -114,7 +114,7 @@ export function TaskModal({ open, initial, defaultDay, defaultStart, onClose }: 
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="What are you focusing on?"
-          className="w-full bg-surface-lowest border border-white/5 rounded-lg p-3 mb-5 outline-none focus:border-brand"
+          className="w-full bg-surface-lowest border border-divider rounded-lg p-3 mb-5 outline-none focus:border-brand"
         />
 
         <div className="grid grid-cols-2 gap-3 mb-5">
@@ -127,7 +127,7 @@ export function TaskModal({ open, initial, defaultDay, defaultStart, onClose }: 
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="bg-surface-lowest border border-white/5 rounded-lg p-2.5 outline-none focus:border-brand"
+            className="bg-surface-lowest border border-divider rounded-lg p-2.5 outline-none focus:border-brand"
           />
         </div>
 
@@ -140,7 +140,7 @@ export function TaskModal({ open, initial, defaultDay, defaultStart, onClose }: 
                   key={t}
                   type="button"
                   onClick={() => setTitle(t)}
-                  className="px-3 py-1.5 text-sm rounded-full bg-surface-lowest border border-white/5"
+                  className="px-3 py-1.5 text-sm rounded-full bg-surface-lowest border border-divider"
                 >
                   {t}
                 </button>
@@ -161,7 +161,7 @@ export function TaskModal({ open, initial, defaultDay, defaultStart, onClose }: 
                   type="button"
                   onClick={() => setCategoryId(c.id)}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm ${
-                    selected ? 'border-white/20' : 'border-white/5'
+                    selected ? 'border-stroke' : 'border-divider'
                   }`}
                 >
                   <span
@@ -182,7 +182,7 @@ export function TaskModal({ open, initial, defaultDay, defaultStart, onClose }: 
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Add some details about this session..."
             rows={3}
-            className="w-full bg-surface-lowest border border-white/5 rounded-lg p-3 outline-none focus:border-brand resize-none"
+            className="w-full bg-surface-lowest border border-divider rounded-lg p-3 outline-none focus:border-brand resize-none"
           />
         </div>
 
@@ -198,7 +198,7 @@ export function TaskModal({ open, initial, defaultDay, defaultStart, onClose }: 
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="px-5 py-2.5 rounded-lg border border-white/10 text-sm"
+              className="px-5 py-2.5 rounded-lg border border-stroke text-sm"
             >
               Cancel
             </button>
@@ -219,7 +219,7 @@ function TimeField({ label, value, onChange }: { label: string; value: string; o
   return (
     <div>
       <div className="label-caps mb-1">{label}</div>
-      <div className="flex items-center bg-surface-lowest border border-white/5 rounded-lg px-3">
+      <div className="flex items-center bg-surface-lowest border border-divider rounded-lg px-3">
         <Clock size={16} className="text-on-surface-variant" />
         <input
           type="time"

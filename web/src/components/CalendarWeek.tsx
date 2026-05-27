@@ -160,11 +160,11 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
 
   return (
     <div
-      className="border border-white/5 rounded-xl overflow-hidden bg-surface-low/30 flex flex-col h-full"
+      className="border border-divider rounded-xl overflow-hidden bg-surface-low/30 flex flex-col h-full"
       style={{ userSelect: drag?.hasMoved ? 'none' : undefined }}
     >
       <div
-        className="grid border-b border-white/5 flex-shrink-0"
+        className="grid border-b border-divider flex-shrink-0"
         style={{ gridTemplateColumns: `64px repeat(${colCount}, 1fr)` }}
       >
         <div />
@@ -307,11 +307,11 @@ function DayColumn({
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       onClick={onClick}
-      className="relative border-l border-white/5 cursor-pointer"
+      className="relative border-l border-divider cursor-pointer"
       style={{ height: totalHours * HOUR_ROW_PX }}
     >
       {Array.from({ length: totalHours }).map((_, i) => (
-        <div key={i} className="border-b border-white/5" style={{ height: HOUR_ROW_PX }} />
+        <div key={i} className="border-b border-divider" style={{ height: HOUR_ROW_PX }} />
       ))}
 
       {hoverSlot && !disabled && (
@@ -322,12 +322,12 @@ function DayColumn({
             left: 6,
             right: 6,
             height: HOUR_ROW_PX - 8,
-            backgroundColor: 'rgba(193,193,255,0.06)',
+            backgroundColor: 'color-mix(in srgb, var(--color-brand) 8%, transparent)',
             backgroundImage:
-              'linear-gradient(to right, rgba(193,193,255,0.18) 1px, transparent 1px), ' +
-              'linear-gradient(to bottom, rgba(193,193,255,0.18) 1px, transparent 1px)',
+              'linear-gradient(to right, color-mix(in srgb, var(--color-brand) 22%, transparent) 1px, transparent 1px), ' +
+              'linear-gradient(to bottom, color-mix(in srgb, var(--color-brand) 22%, transparent) 1px, transparent 1px)',
             backgroundSize: '8px 8px',
-            border: '1px dashed rgba(193,193,255,0.45)',
+            border: '1px dashed color-mix(in srgb, var(--color-brand) 50%, transparent)',
           }}
         >
           <div className="px-2 pt-1 text-[10px] font-semibold tracking-wide text-brand/90 uppercase">

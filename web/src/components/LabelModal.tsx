@@ -80,7 +80,7 @@ export function LabelModal({ open, initial, onClose }: Props) {
       role="presentation"
     >
       <div
-        className="w-full max-w-md bg-surface rounded-2xl border border-white/5 p-6"
+        className="w-full max-w-md bg-surface rounded-2xl border border-divider p-6"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -99,7 +99,7 @@ export function LabelModal({ open, initial, onClose }: Props) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Work"
-            className="w-full bg-surface-lowest border border-white/5 rounded-lg p-3 outline-none focus:border-brand"
+            className="w-full bg-surface-lowest border border-divider rounded-lg p-3 outline-none focus:border-brand"
           />
         </label>
 
@@ -109,7 +109,7 @@ export function LabelModal({ open, initial, onClose }: Props) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional — short description"
-            className="w-full bg-surface-lowest border border-white/5 rounded-lg p-3 outline-none focus:border-brand"
+            className="w-full bg-surface-lowest border border-divider rounded-lg p-3 outline-none focus:border-brand"
           />
         </label>
 
@@ -126,7 +126,7 @@ export function LabelModal({ open, initial, onClose }: Props) {
                   aria-label={`Pick ${swatch}`}
                   aria-pressed={selected}
                   className={`w-8 h-8 rounded-full transition ${
-                    selected ? 'ring-2 ring-offset-2 ring-offset-surface ring-white/40' : 'ring-0'
+                    selected ? 'ring-2 ring-offset-2 ring-offset-surface ring-on-surface/40' : 'ring-0'
                   }`}
                   style={{ backgroundColor: swatch }}
                 />
@@ -149,7 +149,7 @@ export function LabelModal({ open, initial, onClose }: Props) {
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="px-5 py-2.5 rounded-lg border border-white/10 text-sm"
+              className="px-5 py-2.5 rounded-lg border border-stroke text-sm"
             >
               Cancel
             </button>

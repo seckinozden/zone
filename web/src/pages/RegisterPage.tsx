@@ -30,7 +30,7 @@ export function RegisterPage() {
             Minimalism meets high-performance task management.
           </p>
         </div>
-        <div className="rounded-xl border border-white/5 bg-surface p-4">
+        <div className="rounded-xl border border-divider bg-surface p-4">
           <div className="label-caps mb-2 text-brand">Active Focus</div>
           <div className="text-sm">Deep Work Session: "Interface Architecture"</div>
         </div>
@@ -49,7 +49,7 @@ export function RegisterPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="John Doe"
-              className="bg-surface-lowest border border-white/5 rounded-lg w-full p-3 outline-none focus:border-brand"
+              className="bg-surface-lowest border border-divider rounded-lg w-full p-3 outline-none focus:border-brand"
             />
           </Field>
           <Field label="Email Address">
@@ -58,7 +58,7 @@ export function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
-              className="bg-surface-lowest border border-white/5 rounded-lg w-full p-3 outline-none focus:border-brand"
+              className="bg-surface-lowest border border-divider rounded-lg w-full p-3 outline-none focus:border-brand"
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
@@ -67,7 +67,7 @@ export function RegisterPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-surface-lowest border border-white/5 rounded-lg w-full p-3 outline-none focus:border-brand"
+                className="bg-surface-lowest border border-divider rounded-lg w-full p-3 outline-none focus:border-brand"
               />
             </Field>
             <Field label="Confirm">
@@ -75,7 +75,7 @@ export function RegisterPage() {
                 type="password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                className="bg-surface-lowest border border-white/5 rounded-lg w-full p-3 outline-none focus:border-brand"
+                className="bg-surface-lowest border border-divider rounded-lg w-full p-3 outline-none focus:border-brand"
               />
             </Field>
           </div>

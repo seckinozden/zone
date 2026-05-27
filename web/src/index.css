@@ -3,6 +3,7 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
+  /* Dark — the default theme. Overrides for light live under [data-theme="light"] below. */
   --color-canvas: #13131b;
   --color-surface-lowest: #0d0d15;
   --color-surface-low: #1b1b23;
@@ -19,6 +20,10 @@
   --color-brand-strong: #5d5fef;
   --color-on-brand: #1200a9;
 
+  /* Semantic borders. Solid alpha values, theme-flipped. */
+  --color-divider: rgba(255, 255, 255, 0.05);
+  --color-stroke: rgba(255, 255, 255, 0.1);
+
   --color-cat-work: #8b8cff;
   --color-cat-personal: #ffb1c6;
   --color-cat-family: #ffb689;
@@ -29,6 +34,28 @@
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
+}
+
+/* Light — cream base with gray-tinted text and borders. */
+[data-theme="light"] {
+  --color-canvas: #faf6ec;
+  --color-surface-lowest: #f3ecdb;
+  --color-surface-low: #f5efe1;
+  --color-surface: #fffdf6;
+  --color-surface-high: #ebe4d2;
+  --color-surface-highest: #d8cfba;
+
+  --color-on-surface: #1f1f2e;
+  --color-on-surface-variant: #5a5a6a;
+  --color-outline: #6a6a78;
+  --color-outline-variant: #c7c2b8;
+
+  --color-brand: #5d5fef;
+  --color-brand-strong: #4849da;
+  --color-on-brand: #ffffff;
+
+  --color-divider: rgba(28, 28, 50, 0.08);
+  --color-stroke: rgba(28, 28, 50, 0.14);
 }
 
 html, body, #root {
@@ -65,6 +92,9 @@ body {
     transform 140ms ease;
   z-index: 1;
 }
+[data-theme="light"] .event-block {
+  background-color: color-mix(in srgb, var(--cat) 18%, transparent);
+}
 .event-block::before {
   content: '';
   position: absolute;
@@ -80,6 +110,9 @@ body {
     inset 0 0 0 1px color-mix(in srgb, var(--cat) 55%, transparent),
     0 10px 24px -8px color-mix(in srgb, var(--cat) 55%, transparent);
   z-index: 2;
+}
+[data-theme="light"] .event-block:hover {
+  background-color: color-mix(in srgb, var(--cat) 32%, transparent);
 }
 .event-block:hover .event-title {
   text-shadow: 0 0 10px color-mix(in srgb, var(--cat) 50%, transparent);

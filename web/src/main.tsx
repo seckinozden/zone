@@ -10,7 +10,9 @@ import { RegisterPage } from './pages/RegisterPage'
 import { AppLayout } from './components/AppLayout'
 import { CalendarPage } from './pages/CalendarPage'
 import { TasksPage } from './pages/TasksPage'
-import { SettingsPage } from './pages/SettingsPage'
+import { SettingsLayout } from './pages/settings/SettingsLayout'
+import { AccountSettings } from './pages/settings/AccountSettings'
+import { AppearanceSettings } from './pages/settings/AppearanceSettings'
 import { ManageLabelsPage } from './pages/ManageLabelsPage'
 
 const queryClient = new QueryClient({
@@ -40,7 +42,11 @@ createRoot(document.getElementById('root')!).render(
               <Route path="calendar" element={<CalendarPage />} />
               <Route path="tasks" element={<TasksPage />} />
               <Route path="labels" element={<ManageLabelsPage />} />
-              <Route path="settings" element={<SettingsPage />} />
+              <Route path="settings" element={<SettingsLayout />}>
+                <Route index element={<Navigate to="account" replace />} />
+                <Route path="account" element={<AccountSettings />} />
+                <Route path="appearance" element={<AppearanceSettings />} />
+              </Route>
             </Route>
             <Route path="*" element={<Navigate to="/app/calendar" replace />} />
           </Routes>
