@@ -16,6 +16,17 @@ zone/
 
 ## Quick start
 
+Requires [just](https://github.com/casey/just), Docker, Java 21, pnpm.
+
+```bash
+just up                # start db + backend + web in background
+just status            # show what's running
+just down              # stop everything
+just --list            # see all recipes
+```
+
+Manual (without just):
+
 ```bash
 docker compose up -d                   # Postgres on host :5433
 cd backend && ./gradlew bootRun        # API on :8080

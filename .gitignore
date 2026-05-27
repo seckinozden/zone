@@ -41,6 +41,9 @@ coverage/
 *.tmp
 *.bak
 
+# ── just runtime (PIDs, logs from `just up`) ──────────────────────────
+.run/
+
 # ── Claude Code per-user state ────────────────────────────────────────
 # .claude/launch.json IS committed (shared dev-server config).
 # Personal overrides and caches are not.

@@ -61,11 +61,18 @@ docker-compose.yml   Local Postgres on host port 5433
 
 ## Local run
 
+Use the root `justfile`:
+
 ```bash
-docker compose up -d                                # Postgres on :5433
-cd backend && ./gradlew bootRun                     # API on :8080
-cd web && pnpm dev                                  # UI on :5173, /api proxied
+just up         # db + backend + web, all backgrounded; logs in .run/
+just status     # ports + container state
+just back-logs  # tail backend log
+just web-logs   # tail web log
+just down       # stop everything cleanly
+just test       # back-test + web-test
 ```
+
+Each stack also has individual recipes: `back-start/stop/test`, `web-start/stop/test`, `db-up/down`. Run `just --list` for the full set.
 
 Health: <http://localhost:8080/actuator/health>. Login with `admin` / `admin`.
 
