@@ -49,7 +49,7 @@ export function TasksPage() {
         </div>
 
         <button
-          onClick={() => openCreate(anchor)}
+          onClick={() => openCreate({ day: anchor })}
           className="flex items-center gap-2 px-4 py-2 rounded-full bg-brand text-on-brand font-semibold"
         >
           <Plus size={16} /> Add Task

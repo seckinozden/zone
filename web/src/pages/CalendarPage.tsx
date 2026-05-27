@@ -36,7 +36,7 @@ export function CalendarPage() {
         </div>
 
         <button
-          onClick={() => openCreate(anchor)}
+          onClick={() => openCreate({ day: anchor })}
           className="flex items-center gap-2 px-4 py-2 rounded-full bg-brand text-on-brand font-semibold"
         >
           <Plus size={16} /> Add Event
@@ -44,7 +44,12 @@ export function CalendarPage() {
       </div>
 
       <div className="mt-6 flex-1 min-h-0">
-        <CalendarWeek anchor={anchor} range={{ from, to }} onSelectEvent={openEdit} />
+        <CalendarWeek
+          anchor={anchor}
+          range={{ from, to }}
+          onSelectEvent={openEdit}
+          onCreateAt={(start) => openCreate({ start })}
+        />
       </div>
     </div>
   )

@@ -3,22 +3,22 @@ import { Outlet } from 'react-router'
 import { Sidebar } from './Sidebar'
 import { TaskModal } from './TaskModal'
 import type { EventRow } from '../api/client'
-import { TaskModalContext } from './taskModalContext'
+import { TaskModalContext, type CreateDefaults } from './taskModalContext'
 
 export function AppLayout() {
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<EventRow | null>(null)
-  const [defaultDay, setDefaultDay] = useState<Date | undefined>(undefined)
+  const [defaults, setDefaults] = useState<CreateDefaults | undefined>(undefined)
 
   const ctx = {
-    openCreate: (day?: Date) => {
+    openCreate: (d?: CreateDefaults) => {
       setEditing(null)
-      setDefaultDay(day)
+      setDefaults(d)
       setOpen(true)
     },
     openEdit: (row: EventRow) => {
       setEditing(row)
-      setDefaultDay(undefined)
+      setDefaults(undefined)
       setOpen(true)
     },
   }
@@ -33,7 +33,8 @@ export function AppLayout() {
         <TaskModal
           open={open}
           initial={editing}
-          defaultDay={defaultDay}
+          defaultDay={defaults?.day}
+          defaultStart={defaults?.start}
           onClose={() => setOpen(false)}
         />
       </div>

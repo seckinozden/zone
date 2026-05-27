@@ -1,8 +1,15 @@
 import { createContext, useContext } from 'react'
 import type { EventRow } from '../api/client'
 
+export type CreateDefaults = {
+  /** Day to default to (time-of-day ignored). */
+  day?: Date
+  /** Specific start datetime — modal sets date + start time + end (start + 1h). */
+  start?: Date
+}
+
 type Ctx = {
-  openCreate: (day?: Date) => void
+  openCreate: (defaults?: CreateDefaults) => void
   openEdit: (row: EventRow) => void
 }
 

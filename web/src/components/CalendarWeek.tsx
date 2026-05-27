@@ -12,15 +12,20 @@ import {
   timeRange,
   weekDays,
 } from '../lib/time'
+import { snapAt, slotToDate, type Slot } from '../lib/slot'
 import type { EventRow } from '../api/client'
 
 type Props = {
   anchor: Date
   range: { from: Date; to: Date }
   onSelectEvent: (e: EventRow) => void
+  onCreateAt: (start: Date) => void
 }
 
-export function CalendarWeek({ anchor, range, onSelectEvent }: Props) {
+/** Dwell time before the hover preview appears. Prevents flicker while scanning the grid. */
+const HOVER_DELAY_MS = 500
+
+export function CalendarWeek({ anchor, range, onSelectEvent, onCreateAt }: Props) {
   const { data: events } = useEvents(range)
   const { data: categories } = useCategories()
   const days = useMemo(() => weekDays(anchor), [anchor])
@@ -68,9 +73,11 @@ export function CalendarWeek({ anchor, range, onSelectEvent }: Props) {
           {days.map((d) => (
             <DayColumn
               key={d.toISOString()}
+              day={d}
               events={(events ?? []).filter((e) => isSameDay(new Date(e.startTime), d))}
               categories={categories}
               onSelectEvent={onSelectEvent}
+              onCreateAt={onCreateAt}
             />
           ))}
 
@@ -82,45 +89,149 @@ export function CalendarWeek({ anchor, range, onSelectEvent }: Props) {
 }
 
 function DayColumn({
+  day,
   events,
   categories,
   onSelectEvent,
+  onCreateAt,
 }: {
+  day: Date
   events: EventRow[]
   categories: ReturnType<typeof useCategories>['data']
   onSelectEvent: (e: EventRow) => void
+  onCreateAt: (start: Date) => void
 }) {
   const totalHours = DAY_END_HOUR - DAY_START_HOUR + 1
+  const colRef = useRef<HTMLDivElement>(null)
+  const [hoverSlot, setHoverSlot] = useState<Slot | null>(null)
+  const pendingSlot = useRef<Slot | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function cancelHover() {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+    pendingSlot.current = null
+    setHoverSlot(null)
+  }
+
+  function scheduleHover(slot: Slot) {
+    // Already waiting on or showing this exact slot — no-op so micro-movements
+    // within a slot don't restart the timer or flicker the preview.
+    if (pendingSlot.current?.top === slot.top) return
+    if (timerRef.current) clearTimeout(timerRef.current)
+    pendingSlot.current = slot
+    setHoverSlot(null)
+    timerRef.current = setTimeout(() => {
+      setHoverSlot(pendingSlot.current)
+      timerRef.current = null
+    }, HOVER_DELAY_MS)
+  }
+
+  // Clean up timer on unmount so a stale setState doesn't fire on a dead column.
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+  }, [])
+
+  function onMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (!colRef.current) return
+    const target = e.target as HTMLElement
+    if (target.closest('[data-event="1"]')) {
+      cancelHover()
+      return
+    }
+    const rect = colRef.current.getBoundingClientRect()
+    scheduleHover(snapAt(e.clientY - rect.top))
+  }
+
+  function onLeave() {
+    cancelHover()
+  }
+
+  function onClick(e: React.MouseEvent<HTMLDivElement>) {
+    if (!colRef.current) return
+    const rect = colRef.current.getBoundingClientRect()
+    const slot = snapAt(e.clientY - rect.top)
+    onCreateAt(slotToDate(day, slot))
+  }
+
   return (
-    <div className="relative border-l border-white/5" style={{ height: totalHours * HOUR_ROW_PX }}>
+    <div
+      ref={colRef}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      onClick={onClick}
+      className="relative border-l border-white/5 cursor-pointer"
+      style={{ height: totalHours * HOUR_ROW_PX }}
+    >
       {Array.from({ length: totalHours }).map((_, i) => (
         <div key={i} className="border-b border-white/5" style={{ height: HOUR_ROW_PX }} />
       ))}
-      {events.map((e) => {
-        const start = new Date(e.startTime)
-        const end = new Date(e.endTime)
-        const top = (hourFraction(start) - DAY_START_HOUR) * HOUR_ROW_PX
-        const height = Math.max(28, (differenceInMinutes(end, start) / 60) * HOUR_ROW_PX)
-        const cat = categoryById(categories, e.categoryId)
-        const color = categoryColor(cat)
-        return (
-          <button
-            key={e.id}
-            onClick={() => onSelectEvent(e)}
-            className="absolute left-1 right-1 text-left rounded-md px-2 py-1.5 overflow-hidden"
-            style={{
-              top,
-              height,
-              backgroundColor: `${color}1a`,
-              borderLeft: `3px solid ${color}`,
-            }}
-          >
-            <div className="text-xs font-semibold truncate" style={{ color }}>{e.title}</div>
-            <div className="text-[10px] text-on-surface-variant">{timeRange(start, end)}</div>
-          </button>
-        )
-      })}
+
+      {hoverSlot && (
+        <div
+          className="absolute left-1 right-1 pointer-events-none rounded-md transition-opacity"
+          style={{
+            top: hoverSlot.top,
+            height: HOUR_ROW_PX,
+            backgroundColor: 'rgba(193,193,255,0.06)',
+            backgroundImage:
+              'linear-gradient(to right, rgba(193,193,255,0.18) 1px, transparent 1px), ' +
+              'linear-gradient(to bottom, rgba(193,193,255,0.18) 1px, transparent 1px)',
+            backgroundSize: '8px 8px',
+            border: '1px dashed rgba(193,193,255,0.45)',
+          }}
+        >
+          <div className="px-2 pt-1 text-[10px] font-semibold tracking-wide text-brand/90 uppercase">
+            {hoverSlot.label}
+          </div>
+        </div>
+      )}
+
+      {events.map((e) => (
+        <EventBlock
+          key={e.id}
+          event={e}
+          categories={categories}
+          onSelect={onSelectEvent}
+        />
+      ))}
     </div>
+  )
+}
+
+function EventBlock({
+  event,
+  categories,
+  onSelect,
+}: {
+  event: EventRow
+  categories: ReturnType<typeof useCategories>['data']
+  onSelect: (e: EventRow) => void
+}) {
+  const start = new Date(event.startTime)
+  const end = new Date(event.endTime)
+  const top = (hourFraction(start) - DAY_START_HOUR) * HOUR_ROW_PX
+  const height = Math.max(28, (differenceInMinutes(end, start) / 60) * HOUR_ROW_PX)
+  const cat = categoryById(categories, event.categoryId)
+  const color = categoryColor(cat)
+
+  return (
+    <button
+      data-event="1"
+      onClick={(ev) => {
+        ev.stopPropagation()
+        onSelect(event)
+      }}
+      className="event-block absolute left-1 right-1 text-left rounded-md px-2 py-1.5 overflow-hidden cursor-pointer"
+      style={{ top, height, ['--cat' as string]: color }}
+    >
+      <div className="event-title text-xs font-semibold truncate" style={{ color }}>
+        {event.title}
+      </div>
+      <div className="text-[10px] text-on-surface-variant">{timeRange(start, end)}</div>
+    </button>
   )
 }
 

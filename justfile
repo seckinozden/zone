@@ -76,10 +76,10 @@ web-stop:
     @-lsof -ti tcp:{{web_port}} | xargs -r kill 2>/dev/null || true
     @echo "web stopped"
 
-# Run web tests (no test runner wired yet).
+# Run web tests (vitest, headless).
 [group('web')]
 web-test:
-    @echo "no web tests configured yet — extend this recipe when added"
+    cd web && pnpm test
 
 # Tail the web log.
 [group('web')]

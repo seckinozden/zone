@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { format } from 'date-fns'
+import { addHours, format } from 'date-fns'
 import { X, Clock, Trash2 } from 'lucide-react'
 import type { EventRow } from '../api/client'
 import { useCategories, useCreateEvent, useDeleteEvent, useUpdateEvent } from '../api/hooks'
@@ -9,12 +9,14 @@ type Props = {
   open: boolean
   initial?: EventRow | null
   defaultDay?: Date
+  /** Specific start time for a click-to-create flow. Overrides defaultDay. */
+  defaultStart?: Date
   onClose: () => void
 }
 
 const QUICK_TEMPLATES = ['Breakfast', 'Lunch', 'Dinner', 'Gym', 'Yoga']
 
-export function TaskModal({ open, initial, defaultDay, onClose }: Props) {
+export function TaskModal({ open, initial, defaultDay, defaultStart, onClose }: Props) {
   const { data: categories } = useCategories()
   const createMut = useCreateEvent()
   const updateMut = useUpdateEvent()
@@ -39,6 +41,14 @@ export function TaskModal({ open, initial, defaultDay, onClose }: Props) {
       setEndTime(format(e, 'HH:mm'))
       setCategoryId(initial.categoryId)
       setNotes(initial.notes ?? '')
+    } else if (defaultStart) {
+      const end = addHours(defaultStart, 1)
+      setTitle('')
+      setDate(format(defaultStart, 'yyyy-MM-dd'))
+      setStartTime(format(defaultStart, 'HH:mm'))
+      setEndTime(format(end, 'HH:mm'))
+      setCategoryId(categories?.[0]?.id ?? null)
+      setNotes('')
     } else {
       setTitle('')
       setDate(format(defaultDay ?? new Date(), 'yyyy-MM-dd'))
@@ -47,7 +57,17 @@ export function TaskModal({ open, initial, defaultDay, onClose }: Props) {
       setCategoryId(categories?.[0]?.id ?? null)
       setNotes('')
     }
-  }, [open, initial, defaultDay, categories])
+  }, [open, initial, defaultDay, defaultStart, categories])
+
+  // ESC closes the modal.
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
 
   if (!open) return null
 
@@ -71,8 +91,17 @@ export function TaskModal({ open, initial, defaultDay, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg bg-surface rounded-2xl border border-white/5 p-6">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="w-full max-w-lg bg-surface rounded-2xl border border-white/5 p-6"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
         <div className="flex items-start justify-between mb-5">
           <h2 className="text-xl font-semibold">{editing ? 'Edit Task' : 'New Task'}</h2>
           <button onClick={onClose} className="text-on-surface-variant">
