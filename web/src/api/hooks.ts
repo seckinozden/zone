@@ -1,8 +1,36 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, type EventInput } from './client'
+import { api, type CategoryInput, type EventInput } from './client'
 
 export function useCategories() {
   return useQuery({ queryKey: ['categories'], queryFn: api.listCategories })
+}
+
+export function useCreateCategory() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (input: CategoryInput) => api.createCategory(input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
+  })
+}
+
+export function useUpdateCategory() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, input }: { id: number; input: CategoryInput }) => api.updateCategory(id, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['categories'] }),
+  })
+}
+
+export function useDeleteCategory() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => api.deleteCategory(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['categories'] })
+      // Events that referenced this category get categoryId nulled by ON DELETE SET NULL.
+      qc.invalidateQueries({ queryKey: ['events'] })
+    },
+  })
 }
 
 export type EventsRange = { from: Date; to: Date }

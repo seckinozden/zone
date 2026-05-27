@@ -11,6 +11,7 @@ import { AppLayout } from './components/AppLayout'
 import { CalendarPage } from './pages/CalendarPage'
 import { TasksPage } from './pages/TasksPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { ManageLabelsPage } from './pages/ManageLabelsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,7 @@ createRoot(document.getElementById('root')!).render(
               <Route index element={<Navigate to="calendar" replace />} />
               <Route path="calendar" element={<CalendarPage />} />
               <Route path="tasks" element={<TasksPage />} />
+              <Route path="labels" element={<ManageLabelsPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/app/calendar" replace />} />

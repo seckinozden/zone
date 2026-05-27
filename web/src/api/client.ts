@@ -11,7 +11,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>
 }
 
-export type Category = { id: number; name: string; color: string }
+export type Category = { id: number; name: string; color: string; description: string | null }
+
+export type CategoryInput = {
+  name: string
+  color: string
+  description: string | null
+}
 
 export type EventRow = {
   id: number
@@ -32,6 +38,12 @@ export type EventInput = {
 
 export const api = {
   listCategories: () => request<Category[]>('/api/categories'),
+  createCategory: (body: CategoryInput) =>
+    request<Category>('/api/categories', { method: 'POST', body: JSON.stringify(body) }),
+  updateCategory: (id: number, body: CategoryInput) =>
+    request<Category>(`/api/categories/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteCategory: (id: number) =>
+    request<void>(`/api/categories/${id}`, { method: 'DELETE' }),
   listEvents: (range?: { from: Date; to: Date }) => {
     const path = range
       ? `/api/events?from=${encodeURIComponent(range.from.toISOString())}&to=${encodeURIComponent(range.to.toISOString())}`

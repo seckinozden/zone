@@ -53,15 +53,26 @@ body {
 }
 
 /* Calendar event block — colors driven by the --cat CSS variable so hover
-   can mix them without JS state. */
+   can mix them without JS state. The accent bar on the left is a ::before
+   pseudo-element so it can have a straight inner edge (a border-left would
+   curve at the top/bottom following the card's border-radius). */
 .event-block {
   background-color: color-mix(in srgb, var(--cat) 10%, transparent);
-  border-left: 3px solid var(--cat);
+  padding-left: 14px;
   transition:
     background-color 140ms ease,
     box-shadow 140ms ease,
     transform 140ms ease;
   z-index: 1;
+}
+.event-block::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background-color: var(--cat);
 }
 .event-block:hover {
   background-color: color-mix(in srgb, var(--cat) 22%, transparent);
@@ -72,4 +83,18 @@ body {
 }
 .event-block:hover .event-title {
   text-shadow: 0 0 10px color-mix(in srgb, var(--cat) 50%, transparent);
+}
+
+/* Drag preview block — same accent-bar treatment as .event-block. */
+.drag-ghost {
+  padding-left: 14px;
+}
+.drag-ghost::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background-color: var(--cat);
 }

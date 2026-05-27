@@ -20,6 +20,9 @@ public class Category {
     @Column(nullable = false)
     private String color;
 
+    @Column
+    private String description;
+
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private OffsetDateTime createdAt;
 
@@ -30,5 +33,7 @@ public class Category {
     public void setName(String name) { this.name = name; }
     public String getColor() { return color; }
     public void setColor(String color) { this.color = color; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
 }

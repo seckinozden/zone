@@ -1,6 +1,7 @@
 package com.zone.category;
 
 import com.zone.common.CurrentUser;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,13 +19,17 @@ public class CategoryController {
         this.repo = repo;
     }
 
-    public record CategoryDto(Long id, String name, String color) {
+    public record CategoryDto(Long id, String name, String color, String description) {
         static CategoryDto from(Category c) {
-            return new CategoryDto(c.getId(), c.getName(), c.getColor());
+            return new CategoryDto(c.getId(), c.getName(), c.getColor(), c.getDescription());
         }
     }
 
-    public record CreateCategoryRequest(@NotBlank String name, @NotBlank String color) {}
+    public record CategoryRequest(
+            @NotBlank String name,
+            @NotBlank String color,
+            String description
+    ) {}
 
     @GetMapping
     public List<CategoryDto> list() {
@@ -33,12 +38,18 @@ public class CategoryController {
     }
 
     @PostMapping
-    public CategoryDto create(@RequestBody CreateCategoryRequest req) {
+    public CategoryDto create(@Valid @RequestBody CategoryRequest req) {
         Category c = new Category();
         c.setUserId(CurrentUser.ID);
-        c.setName(req.name());
-        c.setColor(req.color());
+        apply(c, req);
         return CategoryDto.from(repo.save(c));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<CategoryDto> update(@PathVariable Long id, @Valid @RequestBody CategoryRequest req) {
+        return repo.findByIdAndUserId(id, CurrentUser.ID)
+                .map(c -> { apply(c, req); return ResponseEntity.ok(CategoryDto.from(repo.save(c))); })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
@@ -46,5 +57,11 @@ public class CategoryController {
         return repo.findByIdAndUserId(id, CurrentUser.ID)
                 .map(c -> { repo.delete(c); return ResponseEntity.noContent().<Void>build(); })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    private static void apply(Category c, CategoryRequest req) {
+        c.setName(req.name());
+        c.setColor(req.color());
+        c.setDescription(req.description());
     }
 }

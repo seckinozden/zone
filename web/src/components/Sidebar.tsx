@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router'
-import { CheckCircle2, LineChart, CalendarDays, BarChart3, Settings, HelpCircle, Plus, LogOut } from 'lucide-react'
+import { CheckCircle2, LineChart, CalendarDays, BarChart3, Settings, HelpCircle, Plus, LogOut, Tag } from 'lucide-react'
 import { useCategories } from '../api/hooks'
 import { categoryColor } from '../lib/categories'
 import { useAuth } from '../auth/AuthProvider'
@@ -35,7 +35,12 @@ export function Sidebar({ onCreateTask }: Props) {
         <DisabledNavItem icon={<BarChart3 size={18} />} label="Insights" />
       </nav>
 
-      <div className="px-6 mt-7">
+      <div className="px-3 mt-6">
+        <div className="label-caps px-3 mb-2">Workspace</div>
+        <NavRouterItem to="/app/labels" icon={<Tag size={18} />} label="Labels" />
+      </div>
+
+      <div className="px-6 mt-6">
         <div className="label-caps mb-3">Categories</div>
         <ul className="space-y-2">
           {categories?.map((c) => (
