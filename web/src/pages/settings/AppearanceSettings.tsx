@@ -1,5 +1,5 @@
 import { Check, Moon, Sun } from 'lucide-react'
-import { useTheme, type Theme } from '../../lib/theme'
+import { useTheme } from '../../lib/theme'
 
 export function AppearanceSettings() {
   const [theme, setTheme] = useTheme()

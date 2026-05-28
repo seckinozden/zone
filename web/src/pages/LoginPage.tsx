@@ -15,8 +15,11 @@ export function LoginPage() {
   function submit(e: React.FormEvent) {
     e.preventDefault()
     const r = signIn(email, password)
-    if (r.ok) nav('/app')
-    else setError(r.error)
+    if (r.ok) {
+      nav('/app')
+      return
+    }
+    setError('error' in r ? r.error : null)
   }
 
   return (

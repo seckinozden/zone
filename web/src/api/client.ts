@@ -54,6 +54,67 @@ export type SleepInput = {
   notes: string | null
 }
 
+export type ExerciseEntry = {
+  id: number
+  performedAt: string
+  type: string
+  durationMin: number | null
+  caloriesBurned: number
+  notes: string | null
+}
+
+export type ExerciseInput = {
+  performedAt: string
+  type: string
+  durationMin: number | null
+  caloriesBurned: number
+  notes: string | null
+}
+
+export type Settings = {
+  weeklyCalorieBudget: number
+}
+
+export type SettingsInput = {
+  weeklyCalorieBudget: number
+}
+
+export type Meal = {
+  id: number
+  date: string
+  mealType: string
+  description: string
+  calories: number
+}
+
+export type MealInput = {
+  date: string
+  mealType: string
+  description: string
+  calories: number
+}
+
+export type Habit = {
+  id: number
+  name: string
+  color: string
+  targetKind: 'daily' | 'weekly'
+  targetCount: number
+}
+
+export type HabitInput = {
+  name: string
+  color: string
+  targetKind: 'daily' | 'weekly'
+  targetCount: number
+}
+
+export type HabitCompletion = {
+  id: number
+  habitId: number
+  date: string
+}
+
 /** Format a JS Date as ISO yyyy-MM-dd, in local time. */
 function localDate(d: Date): string {
   const y = d.getFullYear()
@@ -96,6 +157,54 @@ export const api = {
     request<SleepEntry>(`/api/sleep/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   deleteSleep: (id: number) =>
     request<void>(`/api/sleep/${id}`, { method: 'DELETE' }),
+
+  // ── Exercise ───────────────────────────────────────────────────────
+  listExercise: (range?: { from: Date; to: Date }) => {
+    const path = range
+      ? `/api/exercise?from=${encodeURIComponent(range.from.toISOString())}&to=${encodeURIComponent(range.to.toISOString())}`
+      : '/api/exercise'
+    return request<ExerciseEntry[]>(path)
+  },
+  createExercise: (body: ExerciseInput) =>
+    request<ExerciseEntry>('/api/exercise', { method: 'POST', body: JSON.stringify(body) }),
+  updateExercise: (id: number, body: ExerciseInput) =>
+    request<ExerciseEntry>(`/api/exercise/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteExercise: (id: number) =>
+    request<void>(`/api/exercise/${id}`, { method: 'DELETE' }),
+
+  // ── Settings ───────────────────────────────────────────────────────
+  getSettings: () => request<Settings>('/api/settings'),
+  updateSettings: (body: SettingsInput) =>
+    request<Settings>('/api/settings', { method: 'PATCH', body: JSON.stringify(body) }),
+
+  // ── Meals ──────────────────────────────────────────────────────────
+  listMeals: (range?: DateRange) => {
+    const path = range
+      ? `/api/meals?from=${localDate(range.from)}&to=${localDate(range.to)}`
+      : '/api/meals'
+    return request<Meal[]>(path)
+  },
+  createMeal: (body: MealInput) =>
+    request<Meal>('/api/meals', { method: 'POST', body: JSON.stringify(body) }),
+  updateMeal: (id: number, body: MealInput) =>
+    request<Meal>(`/api/meals/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteMeal: (id: number) =>
+    request<void>(`/api/meals/${id}`, { method: 'DELETE' }),
+
+  // ── Habits ─────────────────────────────────────────────────────────
+  listHabits: () => request<Habit[]>('/api/habits'),
+  createHabit: (body: HabitInput) =>
+    request<Habit>('/api/habits', { method: 'POST', body: JSON.stringify(body) }),
+  updateHabit: (id: number, body: HabitInput) =>
+    request<Habit>(`/api/habits/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteHabit: (id: number) =>
+    request<void>(`/api/habits/${id}`, { method: 'DELETE' }),
+  listHabitCompletions: (range: DateRange) =>
+    request<HabitCompletion[]>(`/api/habits/completions?from=${localDate(range.from)}&to=${localDate(range.to)}`),
+  completeHabit: (id: number, date: string) =>
+    request<HabitCompletion>(`/api/habits/${id}/completions/${date}`, { method: 'PUT' }),
+  uncompleteHabit: (id: number, date: string) =>
+    request<void>(`/api/habits/${id}/completions/${date}`, { method: 'DELETE' }),
 }
 
 export { localDate }

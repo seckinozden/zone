@@ -15,6 +15,10 @@ import { AccountSettings } from './pages/settings/AccountSettings'
 import { AppearanceSettings } from './pages/settings/AppearanceSettings'
 import { ManageLabelsPage } from './pages/ManageLabelsPage'
 import { SleepPage } from './pages/SleepPage'
+import { ExercisePage } from './pages/ExercisePage'
+import { NutritionPage } from './pages/NutritionPage'
+import { HabitsPage } from './pages/HabitsPage'
+import { WellnessSettings } from './pages/settings/WellnessSettings'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,10 +48,14 @@ createRoot(document.getElementById('root')!).render(
               <Route path="tasks" element={<TasksPage />} />
               <Route path="labels" element={<ManageLabelsPage />} />
               <Route path="sleep" element={<SleepPage />} />
+              <Route path="exercise" element={<ExercisePage />} />
+              <Route path="nutrition" element={<NutritionPage />} />
+              <Route path="habits" element={<HabitsPage />} />
               <Route path="settings" element={<SettingsLayout />}>
                 <Route index element={<Navigate to="account" replace />} />
                 <Route path="account" element={<AccountSettings />} />
                 <Route path="appearance" element={<AppearanceSettings />} />
+                <Route path="wellness" element={<WellnessSettings />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/app/calendar" replace />} />

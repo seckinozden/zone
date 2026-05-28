@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router'
-import { CheckCircle2, CalendarDays, Settings, LogOut, Pencil, Moon } from 'lucide-react'
+import { Bike, CheckCircle2, CalendarDays, Settings, LogOut, Pencil, Moon, Salad, Repeat2 } from 'lucide-react'
 import { useCategories } from '../api/hooks'
 import { categoryColor } from '../lib/categories'
 import { useAuth } from '../auth/AuthProvider'
@@ -23,6 +23,9 @@ export function Sidebar() {
       <div className="px-3 mt-6">
         <div className="label-caps px-3 mb-2">Wellness</div>
         <NavRouterItem to="/app/sleep" icon={<Moon size={18} />} label="Sleep" />
+        <NavRouterItem to="/app/exercise" icon={<Bike size={18} />} label="Exercise" />
+        <NavRouterItem to="/app/nutrition" icon={<Salad size={18} />} label="Nutrition" />
+        <NavRouterItem to="/app/habits" icon={<Repeat2 size={18} />} label="Habits" />
       </div>
 
       <div className="px-6 mt-6">

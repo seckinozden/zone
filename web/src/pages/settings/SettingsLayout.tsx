@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router'
-import { Palette, User } from 'lucide-react'
+import { HeartPulse, Palette, User } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 export function SettingsLayout() {
@@ -13,6 +13,9 @@ export function SettingsLayout() {
           </SettingsNavLink>
           <SettingsNavLink to="/app/settings/appearance" icon={<Palette size={16} />}>
             Appearance
+          </SettingsNavLink>
+          <SettingsNavLink to="/app/settings/wellness" icon={<HeartPulse size={16} />}>
+            Wellness
           </SettingsNavLink>
         </nav>
       </aside>
