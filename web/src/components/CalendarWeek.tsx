@@ -214,7 +214,9 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
             )
           })}
 
-          {nowInRange && <NowIndicator now={now} />}
+          {nowInRange && (
+            <NowIndicator now={now} todayIndex={todayIndex} colCount={colCount} />
+          )}
         </div>
       </div>
     </div>
@@ -464,15 +466,42 @@ function DragGhost({
   )
 }
 
-function NowIndicator({ now }: { now: Date }) {
+function NowIndicator({
+  now,
+  todayIndex,
+  colCount,
+}: {
+  now: Date
+  todayIndex: number
+  colCount: number
+}) {
   const top = (hourFraction(now) - DAY_START_HOUR) * HOUR_ROW_PX
+  // The schedule grid is `64px repeat(colCount, 1fr)`. Day columns share the
+  // remaining width equally, so today's column starts at todayIndex / colCount
+  // of the area past the 64px gutter.
+  const dayWidth = `calc((100% - 64px) / ${colCount})`
+  const todayLeft = `calc(64px + ((100% - 64px) / ${colCount}) * ${todayIndex})`
   return (
     <div
       className="absolute z-10 pointer-events-none"
-      style={{ top, left: 64, right: 0 }}
+      style={{ top, left: 0, right: 0 }}
       aria-label={`Current time ${format(now, 'HH:mm')}`}
     >
-      <div className="h-px bg-brand opacity-90" />
+      {/* Faint line across non-today days. */}
+      <div
+        className="absolute bg-brand opacity-25"
+        style={{ left: 64, right: 0, height: 1 }}
+      />
+      {/* Solid, thicker line under today's column. */}
+      <div
+        className="absolute bg-brand"
+        style={{
+          left: todayLeft,
+          width: dayWidth,
+          height: 2,
+          top: -0.5,
+        }}
+      />
     </div>
   )
 }
