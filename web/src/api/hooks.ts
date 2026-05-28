@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, type CategoryInput, type EventInput } from './client'
+import { api, localDate, type CategoryInput, type DateRange, type EventInput, type SleepInput } from './client'
 
 export function useCategories() {
   return useQuery({ queryKey: ['categories'], queryFn: api.listCategories })
@@ -66,5 +66,38 @@ export function useDeleteEvent() {
   return useMutation({
     mutationFn: (id: number) => api.deleteEvent(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
+  })
+}
+
+// ── Sleep ────────────────────────────────────────────────────────────
+
+export function useSleep(range?: DateRange) {
+  const key = range
+    ? ['sleep', localDate(range.from), localDate(range.to)]
+    : ['sleep']
+  return useQuery({ queryKey: key, queryFn: () => api.listSleep(range) })
+}
+
+export function useCreateSleep() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (input: SleepInput) => api.createSleep(input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['sleep'] }),
+  })
+}
+
+export function useUpdateSleep() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, input }: { id: number; input: SleepInput }) => api.updateSleep(id, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['sleep'] }),
+  })
+}
+
+export function useDeleteSleep() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => api.deleteSleep(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['sleep'] }),
   })
 }

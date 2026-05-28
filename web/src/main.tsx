@@ -14,6 +14,7 @@ import { SettingsLayout } from './pages/settings/SettingsLayout'
 import { AccountSettings } from './pages/settings/AccountSettings'
 import { AppearanceSettings } from './pages/settings/AppearanceSettings'
 import { ManageLabelsPage } from './pages/ManageLabelsPage'
+import { SleepPage } from './pages/SleepPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="calendar" element={<CalendarPage />} />
               <Route path="tasks" element={<TasksPage />} />
               <Route path="labels" element={<ManageLabelsPage />} />
+              <Route path="sleep" element={<SleepPage />} />
               <Route path="settings" element={<SettingsLayout />}>
                 <Route index element={<Navigate to="account" replace />} />
                 <Route path="account" element={<AccountSettings />} />

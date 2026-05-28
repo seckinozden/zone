@@ -36,6 +36,32 @@ export type EventInput = {
   notes: string | null
 }
 
+/** Calendar-day range, used by endpoints whose date column is LocalDate (sleep, meals, habits). */
+export type DateRange = { from: Date; to: Date }
+
+export type SleepEntry = {
+  id: number
+  date: string // yyyy-MM-dd
+  score: number // 0..100
+  durationMin: number | null
+  notes: string | null
+}
+
+export type SleepInput = {
+  date: string // yyyy-MM-dd
+  score: number
+  durationMin: number | null
+  notes: string | null
+}
+
+/** Format a JS Date as ISO yyyy-MM-dd, in local time. */
+function localDate(d: Date): string {
+  const y = d.getFullYear()
+  const m = (d.getMonth() + 1).toString().padStart(2, '0')
+  const day = d.getDate().toString().padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 export const api = {
   listCategories: () => request<Category[]>('/api/categories'),
   createCategory: (body: CategoryInput) =>
@@ -56,4 +82,20 @@ export const api = {
     request<EventRow>(`/api/events/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   deleteEvent: (id: number) =>
     request<void>(`/api/events/${id}`, { method: 'DELETE' }),
+
+  // ── Sleep ──────────────────────────────────────────────────────────
+  listSleep: (range?: DateRange) => {
+    const path = range
+      ? `/api/sleep?from=${localDate(range.from)}&to=${localDate(range.to)}`
+      : '/api/sleep'
+    return request<SleepEntry[]>(path)
+  },
+  createSleep: (body: SleepInput) =>
+    request<SleepEntry>('/api/sleep', { method: 'POST', body: JSON.stringify(body) }),
+  updateSleep: (id: number, body: SleepInput) =>
+    request<SleepEntry>(`/api/sleep/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteSleep: (id: number) =>
+    request<void>(`/api/sleep/${id}`, { method: 'DELETE' }),
 }
+
+export { localDate }
