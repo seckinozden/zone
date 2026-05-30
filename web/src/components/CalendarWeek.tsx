@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { differenceInMinutes, format, isSameDay } from 'date-fns'
 import { Copy, MoreHorizontal, Trash2 } from 'lucide-react'
-import { useCategories, useCreateEvent, useDeleteEvent, useEvents, useUpdateEvent } from '../api/hooks'
+import { useCategories, useCreateActivity, useDeleteActivity, useActivities, useUpdateActivity } from '../api/hooks'
 import { categoryById, categoryColor } from '../lib/categories'
 import {
   DAY_END_HOUR,
@@ -14,14 +14,14 @@ import {
   weekDays,
 } from '../lib/time'
 import { dragStartFor, snapAt, slotToDate, type Slot } from '../lib/slot'
-import type { EventRow } from '../api/client'
+import type { ActivityRow } from '../api/client'
 
 type Props = {
   anchor: Date
   /** 'day' = single column, 'week' = Mon→Sun. */
   mode?: 'day' | 'week'
   range: { from: Date; to: Date }
-  onSelectEvent: (e: EventRow) => void
+  onSelectActivity: (e: ActivityRow) => void
   onCreateAt: (start: Date) => void
 }
 
@@ -36,10 +36,10 @@ const DUPLICATE_OFFSET_MS = 10 * 60 * 1000
 const MENU_CLOSE_DELAY_MS = 500
 
 /** Open per-event action menu (Duplicate / Delete), anchored to the ⋯ button. */
-type MenuState = { event: EventRow; x: number; y: number }
+type MenuState = { event: ActivityRow; x: number; y: number }
 
 type DragState = {
-  event: EventRow
+  event: ActivityRow
   durationMs: number
   grabOffsetMin: number
   start: Date
@@ -48,12 +48,12 @@ type DragState = {
   hasMoved: boolean
 }
 
-export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCreateAt }: Props) {
-  const { data: events } = useEvents(range)
+export function CalendarWeek({ anchor, mode = 'week', range, onSelectActivity, onCreateAt }: Props) {
+  const { data: events } = useActivities(range)
   const { data: categories } = useCategories()
-  const updateMut = useUpdateEvent()
-  const createMut = useCreateEvent()
-  const deleteMut = useDeleteEvent()
+  const updateMut = useUpdateActivity()
+  const createMut = useCreateActivity()
+  const deleteMut = useDeleteActivity()
   const days = useMemo(
     () => (mode === 'day' ? [anchor] : weekDays(anchor)),
     [anchor, mode],
@@ -78,11 +78,11 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
   // ── Per-event action menu (Duplicate / Delete) ──
   const [menu, setMenu] = useState<MenuState | null>(null)
 
-  function openEventMenu(event: EventRow, anchor: DOMRect) {
+  function openEventMenu(event: ActivityRow, anchor: DOMRect) {
     setMenu({ event, x: anchor.right, y: anchor.bottom })
   }
 
-  function duplicateEvent(event: EventRow) {
+  function duplicateEvent(event: ActivityRow) {
     const start = new Date(event.startTime)
     const end = new Date(event.endTime)
     createMut.mutate({
@@ -95,7 +95,7 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
     setMenu(null)
   }
 
-  function deleteEvent(event: EventRow) {
+  function deleteEvent(event: ActivityRow) {
     deleteMut.mutate(event.id)
     setMenu(null)
   }
@@ -118,7 +118,7 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
     }
   }, [menu])
 
-  function onEventPointerDown(event: EventRow, e: React.PointerEvent<HTMLDivElement>) {
+  function onEventPointerDown(event: ActivityRow, e: React.PointerEvent<HTMLDivElement>) {
     if (e.button !== 0) return
     const rect = e.currentTarget.getBoundingClientRect()
     const yWithinEvent = e.clientY - rect.top
@@ -199,7 +199,7 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
         }
       } else {
         // Not moved past the threshold — treat as a click.
-        onSelectEvent(drag.event)
+        onSelectActivity(drag.event)
       }
       setDrag(null)
     }
@@ -210,7 +210,7 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
     }
-  }, [drag, onSelectEvent, updateMut])
+  }, [drag, onSelectActivity, updateMut])
 
   return (
     <div
@@ -258,7 +258,7 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
                 day={d}
                 events={(events ?? []).filter((e) => isSameDay(new Date(e.startTime), d))}
                 categories={categories}
-                onSelectEvent={onSelectEvent}
+                onSelectActivity={onSelectActivity}
                 onCreateAt={onCreateAt}
                 onEventPointerDown={onEventPointerDown}
                 onOpenMenu={openEventMenu}
@@ -277,7 +277,7 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
       </div>
 
       {menu && (
-        <EventMenu
+        <ActivityMenu
           x={menu.x}
           y={menu.y}
           onDuplicate={() => duplicateEvent(menu.event)}
@@ -293,7 +293,7 @@ function DayColumn({
   day,
   events,
   categories,
-  onSelectEvent,
+  onSelectActivity,
   onCreateAt,
   onEventPointerDown,
   onOpenMenu,
@@ -303,12 +303,12 @@ function DayColumn({
   disabled,
 }: {
   day: Date
-  events: EventRow[]
+  events: ActivityRow[]
   categories: ReturnType<typeof useCategories>['data']
-  onSelectEvent: (e: EventRow) => void
+  onSelectActivity: (e: ActivityRow) => void
   onCreateAt: (start: Date) => void
-  onEventPointerDown: (e: EventRow, ev: React.PointerEvent<HTMLDivElement>) => void
-  onOpenMenu: (e: EventRow, anchor: DOMRect) => void
+  onEventPointerDown: (e: ActivityRow, ev: React.PointerEvent<HTMLDivElement>) => void
+  onOpenMenu: (e: ActivityRow, anchor: DOMRect) => void
   menuEventId: number | null
   dimmedEventId: number | null
   ghost: DragState | null
@@ -409,7 +409,7 @@ function DayColumn({
       )}
 
       {events.map((e) => (
-        <EventBlock
+        <ActivityBlock
           key={e.id}
           event={e}
           categories={categories}
@@ -419,7 +419,7 @@ function DayColumn({
           dimmed={e.id === dimmedEventId}
           interactive={!disabled || e.id === dimmedEventId}
           ignoreClick={!!disabled}
-          onSelect={onSelectEvent}
+          onSelect={onSelectActivity}
         />
       ))}
 
@@ -435,7 +435,7 @@ function DayColumn({
   )
 }
 
-function EventBlock({
+function ActivityBlock({
   event,
   categories,
   onPointerDown,
@@ -446,11 +446,11 @@ function EventBlock({
   interactive,
   ignoreClick,
 }: {
-  event: EventRow
+  event: ActivityRow
   categories: ReturnType<typeof useCategories>['data']
-  onPointerDown: (e: EventRow, ev: React.PointerEvent<HTMLDivElement>) => void
-  onOpenMenu: (e: EventRow, anchor: DOMRect) => void
-  onSelect: (e: EventRow) => void
+  onPointerDown: (e: ActivityRow, ev: React.PointerEvent<HTMLDivElement>) => void
+  onOpenMenu: (e: ActivityRow, anchor: DOMRect) => void
+  onSelect: (e: ActivityRow) => void
   menuOpen: boolean
   dimmed: boolean
   interactive: boolean
@@ -504,7 +504,7 @@ function EventBlock({
       {interactive && (
         <button
           type="button"
-          aria-label="Event actions"
+          aria-label="Activity actions"
           // Stop pointerdown so opening the menu never starts a drag.
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
@@ -524,7 +524,7 @@ function EventBlock({
 
 /** Floating action menu anchored under an event's ⋯ button. Fixed-positioned so it
  *  escapes the calendar's clipped/scrolling container. */
-function EventMenu({
+function ActivityMenu({
   x,
   y,
   onDuplicate,
@@ -598,7 +598,7 @@ function DragGhost({
 }: {
   start: Date
   durationMs: number
-  event: EventRow
+  event: ActivityRow
   categories: ReturnType<typeof useCategories>['data']
 }) {
   const end = new Date(start.getTime() + durationMs)

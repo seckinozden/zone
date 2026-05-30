@@ -9,7 +9,7 @@ import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { AppLayout } from './components/AppLayout'
 import { CalendarPage } from './pages/CalendarPage'
-import { TasksPage } from './pages/TasksPage'
+import { ActivitiesPage } from './pages/ActivitiesPage'
 import { SettingsLayout } from './pages/settings/SettingsLayout'
 import { AccountSettings } from './pages/settings/AccountSettings'
 import { AppearanceSettings } from './pages/settings/AppearanceSettings'
@@ -45,7 +45,7 @@ createRoot(document.getElementById('root')!).render(
             >
               <Route index element={<Navigate to="calendar" replace />} />
               <Route path="calendar" element={<CalendarPage />} />
-              <Route path="tasks" element={<TasksPage />} />
+              <Route path="activities" element={<ActivitiesPage />} />
               <Route path="labels" element={<ManageLabelsPage />} />
               <Route path="sleep" element={<SleepPage />} />
               <Route path="exercise" element={<ExercisePage />} />

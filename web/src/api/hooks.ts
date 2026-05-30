@@ -2,9 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   api,
   localDate,
+  type ActivityInput,
   type CategoryInput,
   type DateRange,
-  type EventInput,
   type ExerciseInput,
   type HabitInput,
   type MealInput,
@@ -38,45 +38,45 @@ export function useDeleteCategory() {
     mutationFn: (id: number) => api.deleteCategory(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['categories'] })
-      // Events that referenced this category get categoryId nulled by ON DELETE SET NULL.
-      qc.invalidateQueries({ queryKey: ['events'] })
+      // Activities that referenced this category get categoryId nulled by ON DELETE SET NULL.
+      qc.invalidateQueries({ queryKey: ['activities'] })
     },
   })
 }
 
-export type EventsRange = { from: Date; to: Date }
+export type ActivitiesRange = { from: Date; to: Date }
 
-export function useEvents(range?: EventsRange) {
+export function useActivities(range?: ActivitiesRange) {
   const key = range
-    ? ['events', range.from.toISOString(), range.to.toISOString()]
-    : ['events']
+    ? ['activities', range.from.toISOString(), range.to.toISOString()]
+    : ['activities']
   return useQuery({
     queryKey: key,
-    queryFn: () => api.listEvents(range),
+    queryFn: () => api.listActivities(range),
   })
 }
 
-export function useCreateEvent() {
+export function useCreateActivity() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (input: EventInput) => api.createEvent(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
+    mutationFn: (input: ActivityInput) => api.createActivity(input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['activities'] }),
   })
 }
 
-export function useUpdateEvent() {
+export function useUpdateActivity() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, input }: { id: number; input: EventInput }) => api.updateEvent(id, input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
+    mutationFn: ({ id, input }: { id: number; input: ActivityInput }) => api.updateActivity(id, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['activities'] }),
   })
 }
 
-export function useDeleteEvent() {
+export function useDeleteActivity() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: number) => api.deleteEvent(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['events'] }),
+    mutationFn: (id: number) => api.deleteActivity(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['activities'] }),
   })
 }
 
@@ -115,7 +115,7 @@ export function useDeleteSleep() {
 
 // ── Exercise ─────────────────────────────────────────────────────────
 
-export function useExercise(range?: EventsRange) {
+export function useExercise(range?: ActivitiesRange) {
   const key = range
     ? ['exercise', range.from.toISOString(), range.to.toISOString()]
     : ['exercise']

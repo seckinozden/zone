@@ -9,21 +9,21 @@ import {
   startOfMonth,
   startOfWeek,
 } from 'date-fns'
-import { useCategories, useEvents } from '../api/hooks'
+import { useCategories, useActivities } from '../api/hooks'
 import { categoryById, categoryColor } from '../lib/categories'
-import type { EventRow } from '../api/client'
+import type { ActivityRow } from '../api/client'
 
 type Props = {
   anchor: Date
   range: { from: Date; to: Date }
   onSelectDay: (day: Date) => void
-  onSelectEvent: (e: EventRow) => void
+  onSelectActivity: (e: ActivityRow) => void
 }
 
 const WEEKDAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 
-export function CalendarMonth({ anchor, range, onSelectDay, onSelectEvent }: Props) {
-  const { data: events = [] } = useEvents(range)
+export function CalendarMonth({ anchor, range, onSelectDay, onSelectActivity }: Props) {
+  const { data: activities = [] } = useActivities(range)
   const { data: categories } = useCategories()
 
   const days = useMemo(() => {
@@ -34,20 +34,20 @@ export function CalendarMonth({ anchor, range, onSelectDay, onSelectEvent }: Pro
     return eachDayOfInterval({ start: gridStart, end: gridEnd })
   }, [anchor])
 
-  const eventsByDay = useMemo(() => {
-    const m = new Map<string, EventRow[]>()
-    for (const e of events) {
-      const key = format(new Date(e.startTime), 'yyyy-MM-dd')
+  const activitiesByDay = useMemo(() => {
+    const m = new Map<string, ActivityRow[]>()
+    for (const a of activities) {
+      const key = format(new Date(a.startTime), 'yyyy-MM-dd')
       const arr = m.get(key) ?? []
-      arr.push(e)
+      arr.push(a)
       m.set(key, arr)
     }
-    // Sort each day's events by start time so the pills read top-to-bottom in time order.
+    // Sort each day's activities by start time so the pills read top-to-bottom in time order.
     for (const arr of m.values()) {
       arr.sort((a, b) => a.startTime.localeCompare(b.startTime))
     }
     return m
-  }, [events])
+  }, [activities])
 
   const today = new Date()
   const rowCount = days.length / 7
@@ -66,11 +66,11 @@ export function CalendarMonth({ anchor, range, onSelectDay, onSelectEvent }: Pro
       >
         {days.map((day) => {
           const key = format(day, 'yyyy-MM-dd')
-          const dayEvents = eventsByDay.get(key) ?? []
+          const dayActivities = activitiesByDay.get(key) ?? []
           const inMonth = isSameMonth(day, anchor)
           const isToday = isSameDay(day, today)
-          const visible = dayEvents.slice(0, 3)
-          const moreCount = dayEvents.length - visible.length
+          const visible = dayActivities.slice(0, 3)
+          const moreCount = dayActivities.length - visible.length
 
           return (
             <div
@@ -101,7 +101,7 @@ export function CalendarMonth({ anchor, range, onSelectDay, onSelectEvent }: Pro
                       key={e.id}
                       onClick={(ev) => {
                         ev.stopPropagation()
-                        onSelectEvent(e)
+                        onSelectActivity(e)
                       }}
                       className="w-full text-left rounded-md px-1.5 py-1 text-[11px] truncate hover:opacity-90"
                       style={{

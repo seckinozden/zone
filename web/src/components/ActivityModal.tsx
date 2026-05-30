@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { addHours, format } from 'date-fns'
 import { X, Clock, Trash2 } from 'lucide-react'
-import type { EventRow } from '../api/client'
-import { useCategories, useCreateEvent, useDeleteEvent, useUpdateEvent } from '../api/hooks'
+import type { ActivityRow } from '../api/client'
+import { useCategories, useCreateActivity, useDeleteActivity, useUpdateActivity } from '../api/hooks'
 import { categoryColor } from '../lib/categories'
 
 type Props = {
   open: boolean
-  initial?: EventRow | null
+  initial?: ActivityRow | null
   defaultDay?: Date
   /** Specific start time for a click-to-create flow. Overrides defaultDay. */
   defaultStart?: Date
@@ -16,11 +16,11 @@ type Props = {
 
 const QUICK_TEMPLATES = ['Breakfast', 'Lunch', 'Dinner', 'Gym', 'Yoga']
 
-export function TaskModal({ open, initial, defaultDay, defaultStart, onClose }: Props) {
+export function ActivityModal({ open, initial, defaultDay, defaultStart, onClose }: Props) {
   const { data: categories } = useCategories()
-  const createMut = useCreateEvent()
-  const updateMut = useUpdateEvent()
-  const deleteMut = useDeleteEvent()
+  const createMut = useCreateActivity()
+  const updateMut = useUpdateActivity()
+  const deleteMut = useDeleteActivity()
   const editing = !!initial
 
   const [title, setTitle] = useState('')
@@ -103,7 +103,7 @@ export function TaskModal({ open, initial, defaultDay, defaultStart, onClose }: 
         aria-modal="true"
       >
         <div className="flex items-start justify-between mb-5">
-          <h2 className="text-xl font-semibold">{editing ? 'Edit Task' : 'New Task'}</h2>
+          <h2 className="text-xl font-semibold">{editing ? 'Edit Activity' : 'New Activity'}</h2>
           <button onClick={onClose} className="text-on-surface-variant">
             <X size={20} />
           </button>
@@ -192,7 +192,7 @@ export function TaskModal({ open, initial, defaultDay, defaultStart, onClose }: 
               onClick={remove}
               className="flex items-center gap-2 text-sm text-red-300"
             >
-              <Trash2 size={16} /> Delete Task
+              <Trash2 size={16} /> Delete Activity
             </button>
           ) : <span />}
           <div className="flex items-center gap-3">

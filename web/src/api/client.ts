@@ -19,7 +19,7 @@ export type CategoryInput = {
   description: string | null
 }
 
-export type EventRow = {
+export type ActivityRow = {
   id: number
   title: string
   startTime: string
@@ -28,7 +28,7 @@ export type EventRow = {
   notes: string | null
 }
 
-export type EventInput = {
+export type ActivityInput = {
   title: string
   startTime: string
   endTime: string
@@ -131,18 +131,18 @@ export const api = {
     request<Category>(`/api/categories/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   deleteCategory: (id: number) =>
     request<void>(`/api/categories/${id}`, { method: 'DELETE' }),
-  listEvents: (range?: { from: Date; to: Date }) => {
+  listActivities: (range?: { from: Date; to: Date }) => {
     const path = range
-      ? `/api/events?from=${encodeURIComponent(range.from.toISOString())}&to=${encodeURIComponent(range.to.toISOString())}`
-      : '/api/events'
-    return request<EventRow[]>(path)
+      ? `/api/activities?from=${encodeURIComponent(range.from.toISOString())}&to=${encodeURIComponent(range.to.toISOString())}`
+      : '/api/activities'
+    return request<ActivityRow[]>(path)
   },
-  createEvent: (body: EventInput) =>
-    request<EventRow>('/api/events', { method: 'POST', body: JSON.stringify(body) }),
-  updateEvent: (id: number, body: EventInput) =>
-    request<EventRow>(`/api/events/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
-  deleteEvent: (id: number) =>
-    request<void>(`/api/events/${id}`, { method: 'DELETE' }),
+  createActivity: (body: ActivityInput) =>
+    request<ActivityRow>('/api/activities', { method: 'POST', body: JSON.stringify(body) }),
+  updateActivity: (id: number, body: ActivityInput) =>
+    request<ActivityRow>(`/api/activities/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteActivity: (id: number) =>
+    request<void>(`/api/activities/${id}`, { method: 'DELETE' }),
 
   // ── Sleep ──────────────────────────────────────────────────────────
   listSleep: (range?: DateRange) => {

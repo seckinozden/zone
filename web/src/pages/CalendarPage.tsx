@@ -17,14 +17,14 @@ import {
 import { ChevronLeft, ChevronRight, Calendar, Plus } from 'lucide-react'
 import { CalendarWeek } from '../components/CalendarWeek'
 import { CalendarMonth } from '../components/CalendarMonth'
-import { useTaskModal } from '../components/taskModalContext'
+import { useActivityModal } from '../components/activityModalContext'
 
 type View = 'day' | 'week' | 'month'
 
 export function CalendarPage() {
   const [anchor, setAnchor] = useState(new Date())
   const [view, setView] = useState<View>('week')
-  const { openCreate, openEdit } = useTaskModal()
+  const { openCreate, openEdit } = useActivityModal()
 
   const { from, to, label } = useMemo(() => computeWindow(anchor, view), [anchor, view])
 
@@ -77,7 +77,7 @@ export function CalendarPage() {
           onClick={() => openCreate({ day: anchor })}
           className="flex items-center gap-2 px-4 py-2 rounded-full bg-brand text-on-brand font-semibold"
         >
-          <Plus size={16} /> Add Event
+          <Plus size={16} /> Add Activity
         </button>
       </div>
 
@@ -87,14 +87,14 @@ export function CalendarPage() {
             anchor={anchor}
             range={{ from, to }}
             onSelectDay={jumpToDayView}
-            onSelectEvent={openEdit}
+            onSelectActivity={openEdit}
           />
         ) : (
           <CalendarWeek
             anchor={anchor}
             mode={view}
             range={{ from, to }}
-            onSelectEvent={openEdit}
+            onSelectActivity={openEdit}
             onCreateAt={(start) => openCreate({ start })}
           />
         )}

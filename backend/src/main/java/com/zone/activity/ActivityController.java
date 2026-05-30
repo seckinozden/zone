@@ -1,4 +1,4 @@
-package com.zone.event;
+package com.zone.activity;
 
 import com.zone.common.CurrentUser;
 import jakarta.validation.Valid;
@@ -11,26 +11,26 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/activities")
 @CrossOrigin
-public class EventController {
+public class ActivityController {
 
-    private final EventRepository repo;
+    private final ActivityRepository repo;
 
-    public EventController(EventRepository repo) {
+    public ActivityController(ActivityRepository repo) {
         this.repo = repo;
     }
 
-    public record EventDto(
+    public record ActivityDto(
             Long id, String title, OffsetDateTime startTime, OffsetDateTime endTime,
             Long categoryId, String notes) {
-        static EventDto from(Event e) {
-            return new EventDto(e.getId(), e.getTitle(), e.getStartTime(),
-                    e.getEndTime(), e.getCategoryId(), e.getNotes());
+        static ActivityDto from(Activity a) {
+            return new ActivityDto(a.getId(), a.getTitle(), a.getStartTime(),
+                    a.getEndTime(), a.getCategoryId(), a.getNotes());
         }
     }
 
-    public record EventRequest(
+    public record ActivityRequest(
             @NotBlank String title,
             @NotNull OffsetDateTime startTime,
             @NotNull OffsetDateTime endTime,
@@ -38,42 +38,42 @@ public class EventController {
             String notes) {}
 
     @GetMapping
-    public List<EventDto> list(
+    public List<ActivityDto> list(
             @RequestParam(required = false) OffsetDateTime from,
             @RequestParam(required = false) OffsetDateTime to) {
-        List<Event> rows = (from != null && to != null)
+        List<Activity> rows = (from != null && to != null)
                 ? repo.findAllByUserIdAndStartTimeBetweenOrderByStartTimeAsc(CurrentUser.ID, from, to)
                 : repo.findAllByUserIdOrderByStartTimeAsc(CurrentUser.ID);
-        return rows.stream().map(EventDto::from).toList();
+        return rows.stream().map(ActivityDto::from).toList();
     }
 
     @PostMapping
-    public EventDto create(@Valid @RequestBody EventRequest req) {
-        Event e = new Event();
-        e.setUserId(CurrentUser.ID);
-        apply(e, req);
-        return EventDto.from(repo.save(e));
+    public ActivityDto create(@Valid @RequestBody ActivityRequest req) {
+        Activity a = new Activity();
+        a.setUserId(CurrentUser.ID);
+        apply(a, req);
+        return ActivityDto.from(repo.save(a));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<EventDto> update(@PathVariable Long id, @Valid @RequestBody EventRequest req) {
+    public ResponseEntity<ActivityDto> update(@PathVariable Long id, @Valid @RequestBody ActivityRequest req) {
         return repo.findByIdAndUserId(id, CurrentUser.ID)
-                .map(e -> { apply(e, req); return ResponseEntity.ok(EventDto.from(repo.save(e))); })
+                .map(a -> { apply(a, req); return ResponseEntity.ok(ActivityDto.from(repo.save(a))); })
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         return repo.findByIdAndUserId(id, CurrentUser.ID)
-                .map(e -> { repo.delete(e); return ResponseEntity.noContent().<Void>build(); })
+                .map(a -> { repo.delete(a); return ResponseEntity.noContent().<Void>build(); })
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    private static void apply(Event e, EventRequest req) {
-        e.setTitle(req.title());
-        e.setStartTime(req.startTime());
-        e.setEndTime(req.endTime());
-        e.setCategoryId(req.categoryId());
-        e.setNotes(req.notes());
+    private static void apply(Activity a, ActivityRequest req) {
+        a.setTitle(req.title());
+        a.setStartTime(req.startTime());
+        a.setEndTime(req.endTime());
+        a.setCategoryId(req.categoryId());
+        a.setNotes(req.notes());
     }
 }

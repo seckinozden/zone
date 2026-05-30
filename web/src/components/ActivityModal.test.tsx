@@ -10,51 +10,51 @@ vi.mock('../api/hooks', () => ({
       { id: 2, name: 'Personal', color: '#ff6b6b' },
     ],
   }),
-  useCreateEvent: () => ({ mutateAsync: vi.fn().mockResolvedValue({}) }),
-  useUpdateEvent: () => ({ mutateAsync: vi.fn().mockResolvedValue({}) }),
-  useDeleteEvent: () => ({ mutateAsync: vi.fn().mockResolvedValue({}) }),
+  useCreateActivity: () => ({ mutateAsync: vi.fn().mockResolvedValue({}) }),
+  useUpdateActivity: () => ({ mutateAsync: vi.fn().mockResolvedValue({}) }),
+  useDeleteActivity: () => ({ mutateAsync: vi.fn().mockResolvedValue({}) }),
 }))
 
-import { TaskModal } from './TaskModal'
+import { ActivityModal } from './ActivityModal'
 
 afterEach(() => cleanup())
 
-describe('TaskModal', () => {
+describe('ActivityModal', () => {
   it('renders nothing when closed', () => {
-    render(<TaskModal open={false} onClose={() => {}} />)
+    render(<ActivityModal open={false} onClose={() => {}} />)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('renders dialog when open', () => {
-    render(<TaskModal open onClose={() => {}} />)
+    render(<ActivityModal open onClose={() => {}} />)
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByText('New Task')).toBeInTheDocument()
+    expect(screen.getByText('New Activity')).toBeInTheDocument()
   })
 
   it('closes on Escape key', async () => {
     const onClose = vi.fn()
-    render(<TaskModal open onClose={onClose} />)
+    render(<ActivityModal open onClose={onClose} />)
     await userEvent.keyboard('{Escape}')
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('closes when clicking the backdrop', () => {
     const onClose = vi.fn()
-    render(<TaskModal open onClose={onClose} />)
+    render(<ActivityModal open onClose={onClose} />)
     fireEvent.click(screen.getByRole('presentation'))
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('does not close when clicking inside the dialog panel', () => {
     const onClose = vi.fn()
-    render(<TaskModal open onClose={onClose} />)
+    render(<ActivityModal open onClose={onClose} />)
     fireEvent.click(screen.getByRole('dialog'))
     expect(onClose).not.toHaveBeenCalled()
   })
 
   it('defaultStart populates date and start, end = start + 1h', () => {
     const start = new Date(2026, 4, 27, 14, 15) // May 27, 2026 14:15
-    render(<TaskModal open defaultStart={start} onClose={() => {}} />)
+    render(<ActivityModal open defaultStart={start} onClose={() => {}} />)
 
     // Date input uses ISO yyyy-mm-dd
     expect(screen.getByDisplayValue('2026-05-27')).toBeInTheDocument()
@@ -65,7 +65,7 @@ describe('TaskModal', () => {
 
   it('defaultDay sets the date but uses 09:00–10:00 fallback when no start', () => {
     const day = new Date(2026, 4, 27)
-    render(<TaskModal open defaultDay={day} onClose={() => {}} />)
+    render(<ActivityModal open defaultDay={day} onClose={() => {}} />)
 
     expect(screen.getByDisplayValue('2026-05-27')).toBeInTheDocument()
     expect(screen.getByDisplayValue('09:00')).toBeInTheDocument()

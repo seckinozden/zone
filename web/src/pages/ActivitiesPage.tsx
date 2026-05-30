@@ -9,31 +9,31 @@ import {
   subMonths,
 } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, CalendarDays } from 'lucide-react'
-import { useCategories, useEvents } from '../api/hooks'
+import { useCategories, useActivities } from '../api/hooks'
 import { categoryById, categoryColor } from '../lib/categories'
 import { timeRange } from '../lib/time'
-import { useTaskModal } from '../components/taskModalContext'
-import type { EventRow } from '../api/client'
+import { useActivityModal } from '../components/activityModalContext'
+import type { ActivityRow } from '../api/client'
 
-export function TasksPage() {
+export function ActivitiesPage() {
   const [anchor, setAnchor] = useState(new Date())
-  const { openCreate, openEdit } = useTaskModal()
+  const { openCreate, openEdit } = useActivityModal()
 
   const range = useMemo(
     () => ({ from: startOfMonth(anchor), to: endOfMonth(anchor) }),
     [anchor],
   )
 
-  const { data: events = [], isLoading } = useEvents(range)
+  const { data: activities = [], isLoading } = useActivities(range)
   const { data: categories } = useCategories()
 
-  const grouped = useMemo(() => groupByDay(events), [events])
+  const grouped = useMemo(() => groupByDay(activities), [activities])
 
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex items-start justify-between mb-2 flex-shrink-0">
         <div>
-          <h1 className="text-4xl font-semibold tracking-tight">Tasks</h1>
+          <h1 className="text-4xl font-semibold tracking-tight">Activities</h1>
           <div className="flex items-center gap-3 mt-3 text-sm text-on-surface-variant">
             <span className="text-on-surface">{format(anchor, 'MMMM yyyy')}</span>
             <button onClick={() => setAnchor((d) => subMonths(d, 1))} className="ml-2">
@@ -52,15 +52,15 @@ export function TasksPage() {
           onClick={() => openCreate({ day: anchor })}
           className="flex items-center gap-2 px-4 py-2 rounded-full bg-brand text-on-brand font-semibold"
         >
-          <Plus size={16} /> Add Task
+          <Plus size={16} /> Add Activity
         </button>
       </div>
 
       <div className="mt-6 flex-1 min-h-0 overflow-y-auto">
         {isLoading && <div className="text-on-surface-variant text-sm">Loading…</div>}
-        {!isLoading && events.length === 0 && (
+        {!isLoading && activities.length === 0 && (
           <div className="rounded-xl border border-divider bg-surface-low/30 p-8 text-center text-on-surface-variant">
-            No tasks scheduled for {format(anchor, 'MMMM yyyy')}.
+            No activities scheduled for {format(anchor, 'MMMM yyyy')}.
           </div>
         )}
         {grouped.map(([dayKey, items]) => (
@@ -84,9 +84,9 @@ function DaySection({
   onEdit,
 }: {
   day: Date
-  items: EventRow[]
+  items: ActivityRow[]
   categories: ReturnType<typeof useCategories>['data']
-  onEdit: (e: EventRow) => void
+  onEdit: (e: ActivityRow) => void
 }) {
   const heading = isToday(day)
     ? 'Today'
@@ -129,8 +129,8 @@ function DaySection({
   )
 }
 
-function groupByDay(rows: EventRow[]): Array<[string, EventRow[]]> {
-  const map = new Map<string, EventRow[]>()
+function groupByDay(rows: ActivityRow[]): Array<[string, ActivityRow[]]> {
+  const map = new Map<string, ActivityRow[]>()
   for (const r of rows) {
     const key = format(new Date(r.startTime), 'yyyy-MM-dd')
     const arr = map.get(key) ?? []

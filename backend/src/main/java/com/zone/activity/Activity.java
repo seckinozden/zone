@@ -1,11 +1,11 @@
-package com.zone.event;
+package com.zone.activity;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "events")
-public class Event {
+@Table(name = "activities")
+public class Activity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

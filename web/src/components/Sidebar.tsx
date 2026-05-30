@@ -16,7 +16,7 @@ export function Sidebar() {
       </div>
 
       <nav className="px-3 mt-6 flex flex-col gap-1">
-        <NavRouterItem to="/app/tasks" icon={<CheckCircle2 size={18} />} label="Tasks" />
+        <NavRouterItem to="/app/activities" icon={<CheckCircle2 size={18} />} label="Activities" />
         <NavRouterItem to="/app/calendar" icon={<CalendarDays size={18} />} label="Calendar" />
       </nav>
 

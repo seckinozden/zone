@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { EventRow } from '../api/client'
+import type { ActivityRow } from '../api/client'
 
 export type CreateDefaults = {
   /** Day to default to (time-of-day ignored). */
@@ -10,13 +10,13 @@ export type CreateDefaults = {
 
 type Ctx = {
   openCreate: (defaults?: CreateDefaults) => void
-  openEdit: (row: EventRow) => void
+  openEdit: (row: ActivityRow) => void
 }
 
-export const TaskModalContext = createContext<Ctx | null>(null)
+export const ActivityModalContext = createContext<Ctx | null>(null)
 
-export function useTaskModal() {
-  const ctx = useContext(TaskModalContext)
-  if (!ctx) throw new Error('useTaskModal must be used inside AppLayout')
+export function useActivityModal() {
+  const ctx = useContext(ActivityModalContext)
+  if (!ctx) throw new Error('useActivityModal must be used inside AppLayout')
   return ctx
 }
