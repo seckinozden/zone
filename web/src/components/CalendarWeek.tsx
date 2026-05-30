@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { differenceInMinutes, format, isSameDay } from 'date-fns'
-import { useCategories, useEvents, useUpdateEvent } from '../api/hooks'
+import { Copy, MoreHorizontal, Trash2 } from 'lucide-react'
+import { useCategories, useCreateEvent, useDeleteEvent, useEvents, useUpdateEvent } from '../api/hooks'
 import { categoryById, categoryColor } from '../lib/categories'
 import {
   DAY_END_HOUR,
@@ -28,6 +29,14 @@ type Props = {
 const HOVER_DELAY_MS = 400
 /** Distance (px) before a pointerdown on an event becomes a drag instead of a click. */
 const DRAG_THRESHOLD_PX = 4
+/** A duplicated event lands this far below the original, on the same day, so it's
+ *  visible and grabbable rather than stacked exactly on top. */
+const DUPLICATE_OFFSET_MS = 10 * 60 * 1000
+/** Grace period before the action menu auto-closes once the pointer leaves it. */
+const MENU_CLOSE_DELAY_MS = 500
+
+/** Open per-event action menu (Duplicate / Delete), anchored to the ⋯ button. */
+type MenuState = { event: EventRow; x: number; y: number }
 
 type DragState = {
   event: EventRow
@@ -43,6 +52,8 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
   const { data: events } = useEvents(range)
   const { data: categories } = useCategories()
   const updateMut = useUpdateEvent()
+  const createMut = useCreateEvent()
+  const deleteMut = useDeleteEvent()
   const days = useMemo(
     () => (mode === 'day' ? [anchor] : weekDays(anchor)),
     [anchor, mode],
@@ -64,7 +75,50 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
   // ── Drag-to-move state ──
   const [drag, setDrag] = useState<DragState | null>(null)
 
-  function onEventPointerDown(event: EventRow, e: React.PointerEvent<HTMLButtonElement>) {
+  // ── Per-event action menu (Duplicate / Delete) ──
+  const [menu, setMenu] = useState<MenuState | null>(null)
+
+  function openEventMenu(event: EventRow, anchor: DOMRect) {
+    setMenu({ event, x: anchor.right, y: anchor.bottom })
+  }
+
+  function duplicateEvent(event: EventRow) {
+    const start = new Date(event.startTime)
+    const end = new Date(event.endTime)
+    createMut.mutate({
+      title: event.title,
+      startTime: new Date(start.getTime() + DUPLICATE_OFFSET_MS).toISOString(),
+      endTime: new Date(end.getTime() + DUPLICATE_OFFSET_MS).toISOString(),
+      categoryId: event.categoryId,
+      notes: event.notes,
+    })
+    setMenu(null)
+  }
+
+  function deleteEvent(event: EventRow) {
+    deleteMut.mutate(event.id)
+    setMenu(null)
+  }
+
+  // Dismiss the menu on outside pointerdown, Escape, or scroll. The menu popover
+  // stops pointerdown propagation, so clicks on its own buttons don't close it.
+  useEffect(() => {
+    if (!menu) return
+    const close = () => setMenu(null)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenu(null)
+    }
+    window.addEventListener('pointerdown', close)
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('scroll', close, true)
+    return () => {
+      window.removeEventListener('pointerdown', close)
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('scroll', close, true)
+    }
+  }, [menu])
+
+  function onEventPointerDown(event: EventRow, e: React.PointerEvent<HTMLDivElement>) {
     if (e.button !== 0) return
     const rect = e.currentTarget.getBoundingClientRect()
     const yWithinEvent = e.clientY - rect.top
@@ -207,6 +261,8 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
                 onSelectEvent={onSelectEvent}
                 onCreateAt={onCreateAt}
                 onEventPointerDown={onEventPointerDown}
+                onOpenMenu={openEventMenu}
+                menuEventId={menu?.event.id ?? null}
                 dimmedEventId={dimmedId}
                 ghost={showGhost ? drag : null}
                 disabled={!!drag}
@@ -219,6 +275,16 @@ export function CalendarWeek({ anchor, mode = 'week', range, onSelectEvent, onCr
           )}
         </div>
       </div>
+
+      {menu && (
+        <EventMenu
+          x={menu.x}
+          y={menu.y}
+          onDuplicate={() => duplicateEvent(menu.event)}
+          onDelete={() => deleteEvent(menu.event)}
+          onClose={() => setMenu(null)}
+        />
+      )}
     </div>
   )
 }
@@ -230,6 +296,8 @@ function DayColumn({
   onSelectEvent,
   onCreateAt,
   onEventPointerDown,
+  onOpenMenu,
+  menuEventId,
   dimmedEventId,
   ghost,
   disabled,
@@ -239,7 +307,9 @@ function DayColumn({
   categories: ReturnType<typeof useCategories>['data']
   onSelectEvent: (e: EventRow) => void
   onCreateAt: (start: Date) => void
-  onEventPointerDown: (e: EventRow, ev: React.PointerEvent<HTMLButtonElement>) => void
+  onEventPointerDown: (e: EventRow, ev: React.PointerEvent<HTMLDivElement>) => void
+  onOpenMenu: (e: EventRow, anchor: DOMRect) => void
+  menuEventId: number | null
   dimmedEventId: number | null
   ghost: DragState | null
   disabled: boolean
@@ -344,6 +414,8 @@ function DayColumn({
           event={e}
           categories={categories}
           onPointerDown={onEventPointerDown}
+          onOpenMenu={onOpenMenu}
+          menuOpen={e.id === menuEventId}
           dimmed={e.id === dimmedEventId}
           interactive={!disabled || e.id === dimmedEventId}
           ignoreClick={!!disabled}
@@ -367,15 +439,19 @@ function EventBlock({
   event,
   categories,
   onPointerDown,
+  onOpenMenu,
   onSelect,
+  menuOpen,
   dimmed,
   interactive,
   ignoreClick,
 }: {
   event: EventRow
   categories: ReturnType<typeof useCategories>['data']
-  onPointerDown: (e: EventRow, ev: React.PointerEvent<HTMLButtonElement>) => void
+  onPointerDown: (e: EventRow, ev: React.PointerEvent<HTMLDivElement>) => void
+  onOpenMenu: (e: EventRow, anchor: DOMRect) => void
   onSelect: (e: EventRow) => void
+  menuOpen: boolean
   dimmed: boolean
   interactive: boolean
   ignoreClick: boolean
@@ -390,8 +466,10 @@ function EventBlock({
   const color = categoryColor(cat)
 
   return (
-    <button
+    <div
       data-event="1"
+      role="button"
+      tabIndex={interactive ? 0 : -1}
       onPointerDown={(e) => {
         if (!interactive) return
         e.stopPropagation()
@@ -406,7 +484,7 @@ function EventBlock({
         // Fallback if pointer events were intercepted: behave like before.
         if (!interactive) onSelect(event)
       }}
-      className="event-block absolute text-left rounded-md py-1.5 pr-2 overflow-hidden"
+      className="event-block group absolute text-left rounded-md py-1.5 pr-2 overflow-hidden"
       style={{
         top,
         height,
@@ -415,13 +493,100 @@ function EventBlock({
         ['--cat' as string]: color,
         opacity: dimmed ? 0.35 : 1,
         cursor: dimmed ? 'grabbing' : 'grab',
+        zIndex: menuOpen ? 3 : undefined,
       }}
     >
       <div className="event-title text-xs font-semibold truncate" style={{ color }}>
         {event.title}
       </div>
       <div className="text-[10px] text-on-surface-variant">{timeRange(start, end)}</div>
-    </button>
+
+      {interactive && (
+        <button
+          type="button"
+          aria-label="Event actions"
+          // Stop pointerdown so opening the menu never starts a drag.
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            onOpenMenu(event, e.currentTarget.getBoundingClientRect())
+          }}
+          className={`absolute top-1 right-1 grid place-items-center w-5 h-5 rounded text-on-surface-variant bg-surface-low/80 backdrop-blur-sm transition-opacity focus:opacity-100 hover:text-on-surface ${
+            menuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}
+        >
+          <MoreHorizontal size={14} />
+        </button>
+      )}
+    </div>
+  )
+}
+
+/** Floating action menu anchored under an event's ⋯ button. Fixed-positioned so it
+ *  escapes the calendar's clipped/scrolling container. */
+function EventMenu({
+  x,
+  y,
+  onDuplicate,
+  onDelete,
+  onClose,
+}: {
+  x: number
+  y: number
+  onDuplicate: () => void
+  onDelete: () => void
+  onClose: () => void
+}) {
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function cancelClose() {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current)
+      closeTimer.current = null
+    }
+  }
+
+  function scheduleClose() {
+    cancelClose()
+    closeTimer.current = setTimeout(onClose, MENU_CLOSE_DELAY_MS)
+  }
+
+  // Arm a close timer as soon as the menu opens so it can't linger while the
+  // user moves on; hovering the menu cancels it, leaving re-arms it.
+  useEffect(() => {
+    scheduleClose()
+    return cancelClose
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return (
+    <div
+      // Stop pointerdown so the window-level dismiss handler doesn't fire (which
+      // would unmount this before the button's click lands).
+      onPointerDown={(e) => e.stopPropagation()}
+      onMouseEnter={cancelClose}
+      onMouseLeave={scheduleClose}
+      className="fixed z-50 flex items-center gap-1 bg-surface border border-divider rounded-lg shadow-xl p-1"
+      style={{ top: y + 4, left: x, transform: 'translateX(-100%)' }}
+      role="menu"
+    >
+      <button
+        type="button"
+        onClick={onDuplicate}
+        title="Duplicate"
+        className="grid place-items-center w-8 h-8 rounded-md text-on-surface-variant hover:bg-surface-lowest hover:text-on-surface"
+      >
+        <Copy size={16} />
+      </button>
+      <button
+        type="button"
+        onClick={onDelete}
+        title="Delete"
+        className="grid place-items-center w-8 h-8 rounded-md text-red-300 hover:bg-surface-lowest"
+      >
+        <Trash2 size={16} />
+      </button>
+    </div>
   )
 }
 
