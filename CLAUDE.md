@@ -21,7 +21,7 @@ docker-compose.yml   Local Postgres on host port 5433
 - After `pnpm install` or adding a dep, run `pnpm audit`. Bump anything with a CVE.
 - Commit `pnpm-lock.yaml`. Use `pnpm install --frozen-lockfile` in CI.
 
-**Postinstall scripts** are opt-in via `pnpm.onlyBuiltDependencies` in `web/package.json`. Currently the only approved one is `esbuild` (needed for Vite).
+**Postinstall scripts** are opt-in via `allowBuilds` in `web/pnpm-workspace.yaml`. Currently the only approved one is `esbuild` (needed for Vite). The same file also enforces pnpm's dependency cooldown and lockfile supply-chain checks.
 
 ## Stack details
 
@@ -57,7 +57,7 @@ docker-compose.yml   Local Postgres on host port 5433
 1. Check `pnpm view <pkg>@<version> time scripts` — pick a version ≥6 months old with no install scripts (or known-safe ones).
 2. Edit `web/package.json` manually to add the exact pinned version (don't `pnpm add <pkg>`, which writes a caret).
 3. `pnpm install --frozen-lockfile=false` to update the lockfile.
-4. `pnpm audit`. If clean, commit `package.json` + `pnpm-lock.yaml` together.
+4. `just deps-check` to run the frozen install, `pnpm audit`, and OSV-Scanner. If clean, commit `package.json` + `pnpm-lock.yaml` together.
 
 ## Local run
 

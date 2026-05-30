@@ -29,6 +29,7 @@ logs/
 
 # ── Dependency / build caches (defensive — subdirs also cover these) ──
 **/node_modules/
+**/.pnpm-store/
 **/build/
 **/dist/
 **/target/

@@ -16,13 +16,19 @@ zone/
 
 ## Quick start
 
-Requires [just](https://github.com/casey/just), Docker, Java 21, pnpm.
+Requires [just](https://github.com/casey/just), Docker, Java 21, pnpm, and [OSV-Scanner](https://google.github.io/osv-scanner/installation/).
 
 ```bash
-just up                # start db + backend + web in background
+just up                # install + build web/backend, then start all services
 just status            # show what's running
 just down              # stop everything
 just --list            # see all recipes
+```
+
+After changing web dependencies, run the local dependency gate:
+
+```bash
+just deps-check        # frozen pnpm install + pnpm audit + OSV-Scanner
 ```
 
 Manual (without just):

@@ -1,0 +1,11 @@
+# Supply-chain hardening. pnpm 11 reads these settings from this file, not package.json.
+minimumReleaseAge: 1440
+minimumReleaseAgeStrict: true
+minimumReleaseAgeIgnoreMissingTime: false
+blockExoticSubdeps: true
+strictDepBuilds: true
+dangerouslyAllowAllBuilds: false
+trustLockfile: false
+allowBuilds:
+  esbuild: true
+savePrefix: ""

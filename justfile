@@ -11,6 +11,9 @@ web_log := run_dir / "web.log"
 backend_port := "8080"
 web_port := "5173"
 
+# Prepended to bash -c invocations so pnpm is on PATH (nvm, Corepack, etc.).
+node_bootstrap := 'export PATH="$HOME/.local/share/pnpm:$PATH"; [ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh";'
+
 # ── default: list recipes ─────────────────────────────────────────────
 
 default:
@@ -29,6 +32,11 @@ db-down:
     docker compose down
 
 # ── Backend ───────────────────────────────────────────────────────────
+
+# Download dependencies and compile (skips tests — use back-test for those).
+[group('backend')]
+back-build:
+    cd backend && ./gradlew build -x test
 
 # Start the backend in the background. Logs → .run/backend.log
 [group('backend')]
@@ -59,6 +67,16 @@ back-logs:
 
 # ── Web ───────────────────────────────────────────────────────────────
 
+# Install web dependencies from pnpm-lock.yaml.
+[group('web')]
+web-install:
+    bash -c '{{node_bootstrap}} set -euo pipefail; command -v pnpm >/dev/null || { echo "pnpm not found — install: https://pnpm.io/installation" >&2; exit 1; }; cd web && pnpm install --frozen-lockfile'
+
+# Typecheck and production-build the web app (validates before dev server).
+[group('web')]
+web-build: web-install
+    bash -c '{{node_bootstrap}} set -euo pipefail; cd web && pnpm build'
+
 # Start the web dev server in the background. Logs → .run/web.log
 [group('web')]
 web-start:
@@ -66,7 +84,7 @@ web-start:
     @if lsof -ti tcp:{{web_port}} >/dev/null 2>&1; then \
        echo "web already listening on :{{web_port}}"; \
      else \
-       cd web && nohup pnpm dev </dev/null >../{{web_log}} 2>&1 & \
+       cd web && nohup bash -c '{{node_bootstrap}} exec pnpm dev' </dev/null >../{{web_log}} 2>&1 & \
        echo "web starting → http://localhost:{{web_port}} (tail {{web_log}})"; \
      fi
 
@@ -79,17 +97,37 @@ web-stop:
 # Run web tests (vitest, headless).
 [group('web')]
 web-test:
-    cd web && pnpm test
+    bash -c '{{node_bootstrap}} set -euo pipefail; cd web && pnpm test'
 
 # Tail the web log.
 [group('web')]
 web-logs:
     @test -f {{web_log}} && tail -f {{web_log}} || echo "no web log yet"
 
+# ── Security ──────────────────────────────────────────────────────────
+
+# Run pnpm's vulnerability audit for web dependencies.
+[group('security')]
+web-audit:
+    bash -c '{{node_bootstrap}} set -euo pipefail; cd web && pnpm audit'
+
+# Scan the installed web dependency graph with OSV-Scanner.
+[group('security')]
+osv-scan: web-install
+    @command -v osv-scanner >/dev/null || { \
+      echo "osv-scanner not found — install from https://google.github.io/osv-scanner/installation/" >&2; \
+      exit 1; \
+    }
+    osv-scanner scan source --lockfile web/pnpm-lock.yaml web
+
+# Restore locked deps and run local dependency security checks.
+[group('security')]
+deps-check: web-install web-audit osv-scan
+
 # ── Combined ──────────────────────────────────────────────────────────
 
-# Start db + backend + web in the background.
-up: db-up back-start web-start
+# Install deps, build, then start db + backend + web in the background.
+up: db-up web-build back-build back-start web-start
     @echo "all services started"
     @echo "  web:     http://localhost:{{web_port}}"
     @echo "  backend: http://localhost:{{backend_port}}/actuator/health"
